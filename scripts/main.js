@@ -7,20 +7,32 @@ var start_time;
 window.onload = function() {
 
     scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x333333);
 
     camera = new FirstPersonCamera();
 
-    let geometry = new THREE.BoxGeometry(1, 1, 1);
-    let material = new THREE.MeshBasicMaterial({color: 0x00ff00});
-    /*
+    //let geometry = new THREE.BoxGeometry(1, 1, 1);
+    //let geometry = new THREE.TorusGeometry(1.0, 0.4, 16, 100);
+    let geometry = new THREE.TorusKnotGeometry(1.0, 0.1, 100, 16, 2, 5);
     let material = new THREE.ShaderMaterial({
-        uniforms: {
-            time: { value: 0.0 },
-        },
+        uniforms: THREE.UniformsUtils.merge([
+            THREE.UniformsLib['lights'],
+            {
+                time: { value: 0.0 },
+            }
+        ]), 
         vertexShader: document.getElementById('vert').textContent,
-        fragmentShader: document.getElementById('frag').textContent
+        fragmentShader: document.getElementById('frag').textContent,
+        lights: true
     });
-    */
+
+    let light = new THREE.PointLight(0xFFFFFF, 1.0, 100);
+    light.position.set(1.0, 1.0, 1.0);
+    scene.add(light);
+
+    let light2 = new THREE.PointLight(0x00FFFF, 1.0, 100);
+    light2.position.set(-0.5, 0.0, 2.0);
+    scene.add(light2);
 
     cube = new THREE.Mesh(geometry, material);
     scene.add(cube);
@@ -61,7 +73,7 @@ let animate = function() {
     cube.rotation.x += 0.01;
     cube.rotation.y += 0.01;
 
-    //cube.material.uniforms.time.value = (new Date().getTime() - start_time) / 1000;
+    cube.material.uniforms.time.value = (new Date().getTime() - start_time) / 1000;
 
     renderer.render(scene, camera.camera);
 }

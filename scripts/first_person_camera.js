@@ -46,7 +46,6 @@ class FirstPersonCamera {
 
     move_perpendicular(direction) {
         let right = this.right;
-        console.log(this.forward, this.right);
 
         // Scale the direction by the movement amount;
         right.multiplyScalar(this.MOVE_DELTA * direction)
