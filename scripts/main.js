@@ -1,3 +1,4 @@
+var exhibit;
 var scene;
 var camera;
 var renderer;
@@ -11,6 +12,9 @@ window.onload = function() {
 
     camera = new FirstPersonCamera();
 
+    exhibit = new Exhibit();
+
+/*
     //let geometry = new THREE.BoxGeometry(1, 1, 1);
     //let geometry = new THREE.TorusGeometry(1.0, 0.4, 16, 100);
     let geometry = new THREE.TorusKnotGeometry(1.0, 0.1, 100, 16, 2, 5);
@@ -36,6 +40,7 @@ window.onload = function() {
 
     cube = new THREE.Mesh(geometry, material);
     scene.add(cube);
+    */
 
     let w = window.innerWidth;
     let h = window.innerHeight;
@@ -69,11 +74,13 @@ let key_pressed = function(event) {
 
 let animate = function() {
     requestAnimationFrame(animate);
+    /*
 
     cube.rotation.x += 0.01;
     cube.rotation.y += 0.01;
 
     cube.material.uniforms.time.value = (new Date().getTime() - start_time) / 1000;
+    */
 
-    renderer.render(scene, camera.camera);
+    renderer.render(exhibit.scene, camera.camera);
 }

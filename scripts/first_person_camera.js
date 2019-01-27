@@ -7,9 +7,11 @@ class FirstPersonCamera {
         this.FAR = 100;
         this.camera = new THREE.PerspectiveCamera(
             this.FOV, this.ASPECT, this.NEAR, this.FAR);
-        this.camera.position.z = 5;
 
-        this.MOVE_DELTA = 0.1;
+        this.camera.position.z = 5.0;
+        this.camera.position.y = 5.0;
+
+        this.MOVE_DELTA = 0.4;
     }
 
     get forward() {
