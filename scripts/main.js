@@ -12,7 +12,7 @@ window.onload = function() {
 
     camera = new FirstPersonCamera();
 
-    exhibit = new Exhibit();
+    exhibit = new ToonExhibit();
 
 /*
     //let geometry = new THREE.BoxGeometry(1, 1, 1);

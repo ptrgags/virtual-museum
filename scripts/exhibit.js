@@ -23,8 +23,9 @@ class Exhibit {
         let floor = this.make_floor();
         let walls = this.make_walls();
         let ceiling = this.make_ceiling();
+        let main_objs = this.make_main_objs();
 
-        let objs = lights.concat(floor, walls, ceiling);
+        let objs = lights.concat(floor, walls, ceiling, main_objs);
 
         for (let obj of objs) {
             this.scene.add(obj);
@@ -86,5 +87,31 @@ class Exhibit {
         plane.position.y = this.ROOM_SIZE;
 
         return [plane];
+    }
+
+    // Main objects to display this exhibit
+    make_main_objs() {
+        return [];
+    }
+}
+
+class ToonExhibit extends Exhibit {
+    make_main_objs() {
+        let geometry = new THREE.TorusKnotGeometry(1.0, 0.1, 100, 16, 2, 5);
+        let material = new THREE.ShaderMaterial({
+            uniforms: THREE.UniformsUtils.merge([
+                THREE.UniformsLib['lights'],
+                {
+                    time: { value: 0.0 },
+                }
+            ]), 
+            vertexShader: document.getElementById('vert').textContent,
+            fragmentShader: document.getElementById('frag').textContent,
+            lights: true
+        });
+
+        let knot = new THREE.Mesh(geometry, material); 
+        knot.position.y = this.ROOM_SIZE / 4;
+        return [knot];
     }
 }
