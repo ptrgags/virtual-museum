@@ -1,7 +1,6 @@
 class FirstPersonCamera {
     constructor() {
         this.ASPECT = window.innerWidth / window.innerHeight;
-        //this.ASPECT = 1.0;
         this.FOV = 45;
         this.NEAR = 0.1;
         this.FAR = 100;
@@ -11,7 +10,18 @@ class FirstPersonCamera {
         this.camera.position.z = 5.0;
         this.camera.position.y = 5.0;
 
-        this.MOVE_DELTA = 0.4;
+        this.MOVE_DELTA = 0.5;
+
+        // Store the last mouse position
+        this.last_mouse_pos = new THREE.Vector2(
+            window.innerWidth / 2, window.innerHeight / 2);
+        this.DEGREES_PER_PIXEL = 0.0025;
+
+
+        this.camera.rotation.order = 'YXZ';
+
+        // Current yaw and pitch of the camera in degrees
+        this.yaw_pitch = new THREE.Vector2(0, 0);
     }
 
     get forward() {
@@ -55,5 +65,29 @@ class FirstPersonCamera {
         // Move the camera
         this.camera.position.add(right);
         
+    }
+
+    /**
+     * Rotate the view using the change in mouse position
+     *
+     * NOTE: mouse_pos must be specified relative to the *bottom left*
+     * corner of the screen
+     *
+     * Mouse control based on
+     * https://learnopengl.com/Getting-started/Camera
+     */
+    rotate_view(mouse_pos) {
+        // Offset of the yaw/pitch vector
+        let offset = mouse_pos.clone();
+        offset.sub(this.last_mouse_pos);
+
+        // The offset is really 2 Euler angles so change scale
+        offset.multiplyScalar(this.DEGREES_PER_PIXEL);
+
+        this.yaw_pitch.add(offset);
+        this.last_mouse_pos = mouse_pos; 
+
+        this.camera.rotation.y = -this.yaw_pitch.x;
+        this.camera.rotation.x = this.yaw_pitch.y;
     }
 }

@@ -51,6 +51,7 @@ window.onload = function() {
     start_time = new Date().getTime();
 
     document.addEventListener('keydown', key_pressed);
+    document.addEventListener('mousemove', mouse_move);
 
     animate();
 }
@@ -70,6 +71,12 @@ let key_pressed = function(event) {
             camera.move_perpendicular(1);
             break;
     }
+}
+
+let mouse_move = function(event) {
+    let x = event.clientX;
+    let y = (window.innerHeight - 1) - event.clientY;
+    camera.rotate_view(new THREE.Vector2(x, y));
 }
 
 let animate = function() {
