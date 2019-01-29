@@ -15,6 +15,7 @@ window.onload = function() {
     camera = new FirstPersonCamera();
     museum = new Museum();
     museum.move('north');
+    museum.current_exhibit.load();
 
     //exhibit = new ToonExhibit();
 
@@ -85,6 +86,7 @@ let mouse_move = function(event) {
 
 let animate = function() {
     requestAnimationFrame(animate);
+
     /*
 
     cube.rotation.x += 0.01;
@@ -93,7 +95,10 @@ let animate = function() {
     cube.material.uniforms.time.value = (new Date().getTime() - start_time) / 1000;
     */
 
-    let scene = museum.current_exhibit.scene;
-    let cam = camera.camera;
-    renderer.render(scene, cam);
+    let exhibit = museum.current_exhibit;
+
+    if (!exhibit.is_loading) {
+        let scene = exhibit.scene;
+        renderer.render(scene, camera.camera);
+    }
 }
