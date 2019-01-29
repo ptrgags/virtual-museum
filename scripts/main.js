@@ -1,9 +1,11 @@
-var exhibit;
+//var exhibit;
 var scene;
 var camera;
 var renderer;
 var cube;
 var start_time;
+
+var museum;
 
 window.onload = function() {
 
@@ -11,8 +13,10 @@ window.onload = function() {
     scene.background = new THREE.Color(0x333333);
 
     camera = new FirstPersonCamera();
+    museum = new Museum();
+    museum.move('north');
 
-    exhibit = new ToonExhibit();
+    //exhibit = new ToonExhibit();
 
 /*
     //let geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -89,5 +93,7 @@ let animate = function() {
     cube.material.uniforms.time.value = (new Date().getTime() - start_time) / 1000;
     */
 
-    renderer.render(exhibit.scene, camera.camera);
+    let scene = museum.current_exhibit.scene;
+    let cam = camera.camera;
+    renderer.render(scene, cam);
 }
