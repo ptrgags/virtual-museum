@@ -129,6 +129,15 @@ class Exhibit {
     make_main_objs() {
         return [];
     }
+
+    render(renderer, camera) {
+        this.update();
+        renderer.render(this.scene, camera);
+    }
+
+    update() {
+        // called once a frame
+    }
 }
 
 class ToonExhibit extends Exhibit {
@@ -153,8 +162,14 @@ class ToonExhibit extends Exhibit {
     make_main_objs() {
         let geometry = new THREE.TorusKnotGeometry(1.0, 0.1, 100, 16, 2, 5);
         let material = this.materials.get('toon')
-        let knot = new THREE.Mesh(geometry, material); 
-        knot.position.y = this.ROOM_SIZE / 4;
-        return [knot];
+        this.knot = new THREE.Mesh(geometry, material); 
+        this.knot.position.y = this.ROOM_SIZE / 4;
+        return [this.knot];
+    }
+
+    update() {
+        // Make the knot rotate around
+        this.knot.rotation.y += 0.01;
+        this.knot.rotation.z += 0.01;
     }
 }
