@@ -9,7 +9,20 @@ class Exhibit {
                 color: 0xffffff,
                 specular: 0x050505,
                 shininess: 30
+            })],
+            // TODO: Make a procedural wood shader
+            ['door', new THREE.MeshPhongMaterial({
+                color: 0xffaa00,
+                specular: 0x010101,
+                shininess: 20
             })]
+        ]);
+
+        this.DIRECTIONS = new Map([
+            ['east', 0],
+            ['north', Math.PI / 2.0],
+            ['west', Math.PI],
+            ['south', 3.0 * Math.PI / 2.0]
         ]);
 
         // Distance from center to side of the room
@@ -25,14 +38,14 @@ class Exhibit {
     /**
      * Start asynchronous stuff for loading shaders/etc here
      */
-    load() {
+    load(door_info) {
         // Request any shaders if needed
         // TODO: Probably will have another clause and/or parameter
         // for textures and other resources eventually
         let shader_requests = this.make_shader_requests();
         Promise.all(shader_requests)
             .then((shaders) => this.make_materials(shaders))
-            .then(() => this.setup_scene())
+            .then(() => this.setup_scene(door_info))
             .catch(console.error);
     }
 
@@ -53,15 +66,16 @@ class Exhibit {
 
     // TODO: Consider a unload method if needed for resource-intensive exhibits
 
-    setup_scene() {
+    setup_scene(door_info) {
 
         let lights = this.make_lights();
         let floor = this.make_floor();
         let walls = this.make_walls();
+        let doors = this.make_doors(door_info);
         let ceiling = this.make_ceiling();
         let main_objs = this.make_main_objs();
 
-        let objs = lights.concat(floor, walls, ceiling, main_objs);
+        let objs = lights.concat(floor, walls, doors, ceiling, main_objs);
 
         for (let obj of objs) {
             this.scene.add(obj);
@@ -90,6 +104,34 @@ class Exhibit {
         plane.rotation.x = -this.HALF_PI;
 
         return [plane];
+    }
+
+    make_doors(door_directions) {
+        let doors = [];
+        const DOOR_HEIGHT = 3.0 * this.ROOM_SIZE / 4.0;
+        const DOOR_WIDTH = this.ROOM_SIZE / 2.0;
+        const DOOR_THICKNESS = this.ROOM_SIZE / 20.0;
+        const DOOR_POS_ALONG_NORMAL = this.ROOM_SIZE - DOOR_THICKNESS / 2.0;
+        for (let dir of door_directions) {
+            let geom = new THREE.BoxGeometry(1, 1, 1);
+            let door = new THREE.Mesh(geom, this.materials.get('door'));
+            door.scale.x = DOOR_WIDTH;
+            door.scale.y = DOOR_HEIGHT;
+            door.scale.z = DOOR_THICKNESS;
+
+            // Figure out which side of the room to put the door at
+            let offset_dir = this.DIRECTIONS.get(dir);
+            let x = DOOR_POS_ALONG_NORMAL * Math.cos(offset_dir);
+            let z = -DOOR_POS_ALONG_NORMAL * Math.sin(offset_dir);
+            let y =  DOOR_HEIGHT / 2.0;
+            door.position.set(x, y, z);
+
+            // Rotate the door so it is always parallel to the wall
+            door.rotation.y = offset_dir - Math.PI / 2.0;
+
+            doors.push(door);
+        }
+        return doors;
     }
 
     make_walls() {
