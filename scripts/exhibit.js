@@ -211,7 +211,9 @@ class ToonExhibit extends Exhibit {
 
     update() {
         // Make the knot rotate around
-        this.knot.rotation.y += 0.01;
-        this.knot.rotation.z += 0.01;
+        if (this.knot) {
+            this.knot.rotation.y += 0.01;
+            this.knot.rotation.z += 0.01;
+        }
     }
 }

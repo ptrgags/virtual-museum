@@ -25,4 +25,10 @@ class Museum {
     get current_exhibit() {
         return this.layout.current_exhibit;
     }
+
+    get door_info() {
+        // TODO: the current room should be tracked by museum, not the layout
+        let pos = this.layout.current_room;
+        return this.layout.get_door_info(pos);
+    }
 }

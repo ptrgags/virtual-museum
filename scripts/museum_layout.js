@@ -122,10 +122,26 @@ class MuseumLayout {
         let neighbor = pos.clone().add(offset);
 
         try {
-            this.get_exhibit(neighbor);
+            return this.get_exhibit(neighbor);
         } catch(err) {
             return null;
         }
+    }
+
+    /**
+     * For a given location, get a list of which directions
+     * lead to a room
+     */
+    get_door_info(pos) {
+        let info = [];
+        for (let dir of ['east', 'north', 'west', 'south']) {
+            let adjacent = this.get_neighbor(pos, dir);
+            if (adjacent) {
+                // TODO: Also push the adjacent room's label
+                info.push(dir); 
+            }
+        }
+        return info
     }
 
     /**

@@ -14,7 +14,8 @@ window.onload = function() {
 
     camera = new FirstPersonCamera();
     museum = new Museum();
-    museum.current_exhibit.load(['north', 'east']);
+    museum.move('north');
+    museum.current_exhibit.load(museum.door_info);
 
     let w = window.innerWidth;
     let h = window.innerHeight;
