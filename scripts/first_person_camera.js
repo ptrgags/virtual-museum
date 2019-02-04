@@ -90,4 +90,21 @@ class FirstPersonCamera {
         this.camera.rotation.y = -this.yaw_pitch.x;
         this.camera.rotation.x = this.yaw_pitch.y;
     }
+
+    key_pressed(key_code) {
+        switch (key_code) {
+            case "KeyW":
+                this.move_parallel(1);
+                break;
+            case "KeyS":
+                this.move_parallel(-1);
+                break;
+            case "KeyA":
+                this.move_perpendicular(-1);
+                break;
+            case "KeyD":
+                this.move_perpendicular(1);
+                break;
+        }
+    }
 }

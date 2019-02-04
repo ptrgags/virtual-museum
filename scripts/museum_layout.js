@@ -1,15 +1,11 @@
 class MuseumLayout {
-    constructor() {
+    constructor(width=8, height=8) {
         // maximum size of the museum in # rooms in each direction
-        this.MAP_WIDTH = 8;
-        this.MAP_HEIGHT = 8;
+        this.map_width = width;
+        this.map_height = height;
 
         // Start out with an empty museum
-        this.layout = this.make_empty_layout();
- 
-        // Specify the starting room in index space
-        this.ENTRANCE = new THREE.Vector2(4, 4);
-        this.current_room = this.ENTRANCE;
+        this.layout = this.make_empty_layout(); 
 
         // Index space offsets for the cardinal directions
         this.OFFSETS = new Map([
@@ -22,8 +18,8 @@ class MuseumLayout {
 
     make_empty_layout() {
         let rows = [];
-        for (let i = 0; i < this.MAP_HEIGHT; i++) {
-            let row = Array(8).fill(null);
+        for (let i = 0; i < this.map_height; i++) {
+            let row = Array(this.map_width).fill(null);
             rows.push(row);
         }
         return rows;
@@ -45,29 +41,20 @@ class MuseumLayout {
     }
 
     /**
-     * For the minimap shader, get the index of the current room
+     * Convert 2D -> 1D index
+     * This is useful for the minimap shader
      */
-    get current_room_index() {
-        let row = this.current_room.x;
-        let col = this.current_room.y;
-        return row * this.MAP_WIDTH + col;
-    }
-
-    /**
-     * For the minimap shader, get the index of the entrance
-     */
-    get entrance_index() {
-        let row = this.ENTRANCE.x;
-        let col = this.ENTRANCE.y;
-        return row * this.MAP_WIDTH + col;
+    get_index(coords) {
+        // x = row, y = col
+        return coords.x + this.map_width + coords.y;
     }
 
     /**
      * Check if indices are within the bounds of the map
      */
     validate_coords(indices) {
-        let row_valid = 0 <= indices.x && indices.x < this.MAP_HEIGHT;
-        let col_valid = 0 <= indices.y && indices.y < this.MAP_WIDTH;
+        let row_valid = 0 <= indices.x && indices.x < this.map_height;
+        let col_valid = 0 <= indices.y && indices.y < this.map_width;
 
         if (!row_valid || !col_valid) {
             throw new Error(`Invalid coords! ${json.stringify(indices)}`);
@@ -141,7 +128,7 @@ class MuseumLayout {
                 info.push(dir); 
             }
         }
-        return info
+        return info;
     }
 
     /**
