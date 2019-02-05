@@ -107,4 +107,15 @@ class FirstPersonCamera {
                 break;
         }
     }
+
+    get bbox() {
+        let bbox = new THREE.Box3();
+        bbox.setFromObject(this.camera);
+
+        const OFFSET = new THREE.Vector3(0.5, 0.5, 0.5);
+        let center = this.camera.position.clone();
+        let min_coords = center.clone().sub(OFFSET);
+        let max_coords = center.clone().add(OFFSET);
+        return new THREE.Box3(min_coords, max_coords);
+    }
 }

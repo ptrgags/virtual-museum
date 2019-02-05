@@ -33,6 +33,11 @@ class Exhibit {
 
         // When loading
         this.is_loading = false;
+
+        // Lists of objects that need bounding boxes
+        this.doors = new Map();
+        this.walls = [];
+        this.main_objs = [];
     }
 
     /**
@@ -64,18 +69,51 @@ class Exhibit {
         // update this.materials() here.
     }
 
+    make_bbox(obj) {
+        let bbox = new THREE.Box3();
+        bbox.setFromObject(obj);
+        return bbox;
+    }
+
+    get wall_bboxes() {
+        return this.walls.map((x) => this.make_bbox(x));
+    }
+
+    get obj_bboxes() {
+        return this.main_objs.map((x) => this.make_bbox(x));
+    }
+
+    /**
+     * This one is slightly different. It returns not just an array of
+     * bounding boxes, but an array of arrays:
+     *
+     * [direction, bbox] so we know which way to go
+     */
+    get door_bboxes() {
+        let results = [];
+        for (let [dir, door] of this.doors) {
+            results.push([dir, this.make_bbox(door)]);
+        }
+        return results;
+    }
+
     // TODO: Consider a unload method if needed for resource-intensive exhibits
 
     setup_scene(door_info) {
 
         let lights = this.make_lights();
         let floor = this.make_floor();
-        let walls = this.make_walls();
-        let doors = this.make_doors(door_info);
+        this.walls = this.make_walls();
+        this.doors = this.make_doors(door_info);
         let ceiling = this.make_ceiling();
-        let main_objs = this.make_main_objs();
+        this.main_objs = this.make_main_objs();
 
-        let objs = lights.concat(floor, walls, doors, ceiling, main_objs);
+        let objs = lights.concat(
+            floor, 
+            this.walls, 
+            [...this.doors.values()], 
+            ceiling, 
+            this.main_objs);
 
         for (let obj of objs) {
             this.scene.add(obj);
@@ -107,7 +145,7 @@ class Exhibit {
     }
 
     make_doors(door_directions) {
-        let doors = [];
+        let doors = new Map();
         const DOOR_HEIGHT = 3.0 * this.ROOM_SIZE / 4.0;
         const DOOR_WIDTH = this.ROOM_SIZE / 2.0;
         const DOOR_THICKNESS = this.ROOM_SIZE / 20.0;
@@ -129,7 +167,8 @@ class Exhibit {
             // Rotate the door so it is always parallel to the wall
             door.rotation.y = offset_dir - Math.PI / 2.0;
 
-            doors.push(door);
+            // Add a door to the map
+            doors.set(dir, door);
         }
         return doors;
     }

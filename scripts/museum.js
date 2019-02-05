@@ -58,7 +58,33 @@ class Museum {
         this.current_exhibit.load(this.door_info);
     }
 
+    collide_obstacles() {
+        let camera = this.camera.bbox;
+        let walls = this.current_exhibit.wall_bboxes;
+        let objs = this.current_exhibit.obj_bboxes;
+        let obstacles = walls.concat(objs)  
+
+        for (let bbox of obstacles) {
+            if (camera.intersectsBox(bbox)) {
+                console.log("Hit an obstacle!");
+            }
+        }
+    }
+
+    collide_doors() {
+        let camera = this.camera.bbox;
+        let doors = this.current_exhibit.door_bboxes;
+
+        for (let [dir, bbox] of doors) {
+            if (camera.intersectsBox(bbox)) {
+                console.log(`Opened the ${dir} door!`);
+            }
+        }
+    }
+
     check_collisions() {
+        this.collide_obstacles();
+        this.collide_doors();
     }
 
     update() {
