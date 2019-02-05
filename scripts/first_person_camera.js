@@ -70,10 +70,12 @@ class FirstPersonCamera {
     }
 
     reposition(new_pos, new_angle) {
-        console.log('moved to', new_pos, new_angle);
         this.prev_position = new_pos.clone();
         this.camera.position.copy(new_pos);
-        this.camera.rotation.y = new_angle;
+        this.camera.rotation.y = new_angle - Math.PI / 2.0;
+
+        this.prev_position = this.camera.position.clone();
+        this.yaw_pitch = new THREE.Vector2(0, 0);
     }
 
     /**
@@ -125,7 +127,7 @@ class FirstPersonCamera {
         let bbox = new THREE.Box3();
         bbox.setFromObject(this.camera);
 
-        const OFFSET = new THREE.Vector3(1.0, 1.0, 1.0);
+        const OFFSET = new THREE.Vector3(0.6, 2.0, 0.6);
         let center = this.camera.position.clone();
         let min_coords = center.clone().sub(OFFSET);
         let max_coords = center.clone().add(OFFSET);

@@ -170,7 +170,6 @@ class Exhibit {
             let z = -DOOR_POS_ALONG_NORMAL * Math.sin(offset_dir);
             let y =  DOOR_HEIGHT / 2.0;
             door.position.set(x, y, z);
-            console.log('door created at', door.position);
 
             // Rotate the door so it is always parallel to the wall
             door.rotation.y = offset_dir - Math.PI / 2.0;
@@ -230,11 +229,11 @@ class Exhibit {
         let forward_angle = this.DIRECTIONS.get(dir);
 
         // Now back up to the other side of the room
-        const OFFSET_AMOUNT = 0.9 * this.ROOM_SIZE;
+        const OFFSET_AMOUNT = 0.8 * this.ROOM_SIZE;
         const CAMERA_HEIGHT = 5.0;
         let backward_angle = -forward_angle;
-        let x = -OFFSET_AMOUNT * Math.cos(backward_angle);
-        let z = OFFSET_AMOUNT * Math.sin(backward_angle);
+        let x = OFFSET_AMOUNT * Math.cos(backward_angle);
+        let z = -OFFSET_AMOUNT * Math.sin(backward_angle);
         let offset = new THREE.Vector3(x, CAMERA_HEIGHT, z);
 
         camera.reposition(offset, forward_angle);
