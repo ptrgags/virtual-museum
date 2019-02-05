@@ -3,6 +3,40 @@
  */
 class Exhibit {
     constructor() {
+        this.DIRECTIONS = new Map([
+            ['east', 0],
+            ['north', Math.PI / 2.0],
+            ['west', Math.PI],
+            ['south', 3.0 * Math.PI / 2.0]
+        ]);
+
+        // Distance from center to side of the room
+        this.ROOM_SIZE = 20.0;
+        this.HALF_PI = Math.PI / 2.0
+
+        // Set up variables in a function so we can
+        // discard everything easily
+        this.reset();
+    }
+
+    /**
+     * Start asynchronous stuff for loading shaders/etc here
+     */
+    load(door_info) {
+        this.is_loading = true;
+
+        // Request any shaders if needed
+        // TODO: Probably will have another clause and/or parameter
+        // for textures and other resources eventually
+        let shader_requests = this.make_shader_requests();
+        Promise.all(shader_requests)
+            .then((shaders) => this.make_materials(shaders))
+            .then(() => this.setup_scene(door_info))
+            .then(() => this.is_loading = false)
+            .catch(console.error);
+    }
+
+    reset() {
         // Table of materials available
         this.materials = new Map([
             ['default', new THREE.MeshPhongMaterial({
@@ -18,17 +52,6 @@ class Exhibit {
             })]
         ]);
 
-        this.DIRECTIONS = new Map([
-            ['east', 0],
-            ['north', Math.PI / 2.0],
-            ['west', Math.PI],
-            ['south', 3.0 * Math.PI / 2.0]
-        ]);
-
-        // Distance from center to side of the room
-        this.ROOM_SIZE = 20.0;
-        this.HALF_PI = Math.PI / 2.0
-
         this.scene = new THREE.Scene();
 
         // When loading
@@ -38,20 +61,6 @@ class Exhibit {
         this.doors = new Map();
         this.walls = [];
         this.main_objs = [];
-    }
-
-    /**
-     * Start asynchronous stuff for loading shaders/etc here
-     */
-    load(door_info) {
-        // Request any shaders if needed
-        // TODO: Probably will have another clause and/or parameter
-        // for textures and other resources eventually
-        let shader_requests = this.make_shader_requests();
-        Promise.all(shader_requests)
-            .then((shaders) => this.make_materials(shaders))
-            .then(() => this.setup_scene(door_info))
-            .catch(console.error);
     }
 
     /**
@@ -96,8 +105,6 @@ class Exhibit {
         }
         return results;
     }
-
-    // TODO: Consider a unload method if needed for resource-intensive exhibits
 
     setup_scene(door_info) {
 
@@ -163,6 +170,7 @@ class Exhibit {
             let z = -DOOR_POS_ALONG_NORMAL * Math.sin(offset_dir);
             let y =  DOOR_HEIGHT / 2.0;
             door.position.set(x, y, z);
+            console.log('door created at', door.position);
 
             // Rotate the door so it is always parallel to the wall
             door.rotation.y = offset_dir - Math.PI / 2.0;
@@ -209,6 +217,27 @@ class Exhibit {
     // Main objects to display this exhibit
     make_main_objs() {
         return [];
+    }
+
+    /**
+     * Reposition the camera in the room given the direction of the door
+     * we just came through.
+     *
+     * e.g. if you just used the north door, pass in 'north'
+     */
+    reposition_camera(camera, dir) {
+        // The camera should point in the direction through the door
+        let forward_angle = this.DIRECTIONS.get(dir);
+
+        // Now back up to the other side of the room
+        const OFFSET_AMOUNT = 0.9 * this.ROOM_SIZE;
+        const CAMERA_HEIGHT = 5.0;
+        let backward_angle = -forward_angle;
+        let x = -OFFSET_AMOUNT * Math.cos(backward_angle);
+        let z = OFFSET_AMOUNT * Math.sin(backward_angle);
+        let offset = new THREE.Vector3(x, CAMERA_HEIGHT, z);
+
+        camera.reposition(offset, forward_angle);
     }
 
     render(renderer, camera) {

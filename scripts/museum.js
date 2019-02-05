@@ -39,12 +39,6 @@ class Museum {
         }
     }
 
-    /*
-    move(direction) {
-        this.layout.move(direction);
-    }
-    */
-
     get current_exhibit() {
         return this.layout.get_exhibit(this.current_room);
     }
@@ -54,8 +48,33 @@ class Museum {
         return this.layout.get_door_info(pos);
     }
 
+
     load() {
+        this.current_exhibit.reposition_camera(this.camera, 'north');
         this.current_exhibit.load(this.door_info);
+    }
+
+    /**
+     * Move to the next room in a given direction (north|south|east|west)
+     */
+    move(dir) { 
+        // save a reference to the current exhibit
+        let exhibit = this.current_exhibit;
+
+        // Move the cursor to the new room
+        let [next_pos, next_exhibit] = 
+            this.layout.get_neighbor(this.current_room, dir);
+        this.current_room = next_pos;
+
+        // Reposition the camera on the other side of the door
+        next_exhibit.reposition_camera(this.camera, dir);
+
+        // Load the new room
+        next_exhibit.load(this.door_info);
+
+        // Reset the old exhibit to a pristine state
+        exhibit.reset();
+        
     }
 
     collide_obstacles() {
@@ -66,7 +85,8 @@ class Museum {
 
         for (let bbox of obstacles) {
             if (camera.intersectsBox(bbox)) {
-                console.log("Hit an obstacle!");
+                // Move to the previous position
+                this.camera.backtrack();
             }
         }
     }
@@ -77,7 +97,7 @@ class Museum {
 
         for (let [dir, bbox] of doors) {
             if (camera.intersectsBox(bbox)) {
-                console.log(`Opened the ${dir} door!`);
+                this.move(dir);
             }
         }
     }
@@ -88,7 +108,9 @@ class Museum {
     }
 
     update() {
-        this.check_collisions();
+        if (!this.current_exhibit.is_loading) { 
+            this.check_collisions();
+        }
     }
 
     render(renderer) {

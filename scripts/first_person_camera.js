@@ -7,8 +7,9 @@ class FirstPersonCamera {
         this.camera = new THREE.PerspectiveCamera(
             this.FOV, this.ASPECT, this.NEAR, this.FAR);
 
-        this.camera.position.z = 5.0;
-        this.camera.position.y = 5.0;
+        // Keep a copy of the previous position so we can step backwards
+        // on collision
+        this.prev_position = this.camera.position.clone();
 
         this.MOVE_DELTA = 0.5;
 
@@ -16,7 +17,6 @@ class FirstPersonCamera {
         this.last_mouse_pos = new THREE.Vector2(
             window.innerWidth / 2, window.innerHeight / 2);
         this.DEGREES_PER_PIXEL = 0.0025;
-
 
         this.camera.rotation.order = 'YXZ';
 
@@ -53,6 +53,7 @@ class FirstPersonCamera {
         fwd.multiplyScalar(this.MOVE_DELTA * direction)
 
         // Move the camera
+        this.prev_position = this.camera.position.clone();
         this.camera.position.add(fwd);
     }
 
@@ -63,8 +64,16 @@ class FirstPersonCamera {
         right.multiplyScalar(this.MOVE_DELTA * direction)
 
         // Move the camera
+        this.prev_position = this.camera.position.clone();
         this.camera.position.add(right);
         
+    }
+
+    reposition(new_pos, new_angle) {
+        console.log('moved to', new_pos, new_angle);
+        this.prev_position = new_pos.clone();
+        this.camera.position.copy(new_pos);
+        this.camera.rotation.y = new_angle;
     }
 
     /**
@@ -108,11 +117,15 @@ class FirstPersonCamera {
         }
     }
 
+    backtrack() {
+        this.camera.position.copy(this.prev_position);
+    }
+
     get bbox() {
         let bbox = new THREE.Box3();
         bbox.setFromObject(this.camera);
 
-        const OFFSET = new THREE.Vector3(0.5, 0.5, 0.5);
+        const OFFSET = new THREE.Vector3(1.0, 1.0, 1.0);
         let center = this.camera.position.clone();
         let min_coords = center.clone().sub(OFFSET);
         let max_coords = center.clone().add(OFFSET);

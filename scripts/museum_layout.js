@@ -109,7 +109,7 @@ class MuseumLayout {
         let neighbor = pos.clone().add(offset);
 
         try {
-            return this.get_exhibit(neighbor);
+            return [neighbor, this.get_exhibit(neighbor)];
         } catch(err) {
             return null;
         }
@@ -122,7 +122,7 @@ class MuseumLayout {
     get_door_info(pos) {
         let info = [];
         for (let dir of ['east', 'north', 'west', 'south']) {
-            let adjacent = this.get_neighbor(pos, dir);
+            let [, adjacent] = this.get_neighbor(pos, dir);
             if (adjacent) {
                 // TODO: Also push the adjacent room's label
                 info.push(dir); 
