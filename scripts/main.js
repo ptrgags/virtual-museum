@@ -1,16 +1,10 @@
 //var exhibit;
-var scene;
 var renderer;
-var cube;
-var start_time;
 
 var museum;
+var pointer_locked = false;
 
 window.onload = function() {
-
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x333333);
-
     museum = new Museum();
     museum.load();
 
@@ -20,18 +14,23 @@ window.onload = function() {
     renderer.setSize(w, h);
     document.body.appendChild(renderer.domElement);
 
-    start_time = new Date().getTime();
-
     document.addEventListener('keydown', (event) => museum.key_pressed(event));
-    document.addEventListener('mousemove', mouse_move);
+
+    //set up the mouse
+    renderer.domElement.onclick = init_mouse;
 
     animate();
 }
 
-/** TODO: Delegate some of this to the museum and camera */
+init_mouse = function() {
+    let element = renderer.domElement;
+    element.requestPointerLock();
+    element.addEventListener('mousemove', mouse_move);
+}
+
 let mouse_move = function(event) {
-    let x = event.clientX;
-    let y = (window.innerHeight - 1) - event.clientY;
+    let x = event.movementX;
+    let y = -event.movementY;
     museum.camera.rotate_view(new THREE.Vector2(x, y));
 }
 

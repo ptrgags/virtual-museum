@@ -90,7 +90,6 @@ class FirstPersonCamera {
     rotate_view(mouse_pos) {
         // Offset of the yaw/pitch vector
         let offset = mouse_pos.clone();
-        offset.sub(this.last_mouse_pos);
 
         // The offset is really 2 Euler angles so change scale
         offset.multiplyScalar(this.DEGREES_PER_PIXEL);
