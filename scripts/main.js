@@ -48,12 +48,21 @@ let animate = function() {
     // Render the main view
     museum.update();
     museum.render(renderer);
+ 
+    // Determine where the HUD elements go given the current screen size 
+    const COMPASS_DIMS = new THREE.Vector3(100, 100);
+    const MINIMAP_DIMS = new THREE.Vector3(200, 200);
+    let corner = new THREE.Vector3(window.innerWidth, window.innerHeight);
+    let minimap_pos = corner.clone().sub(MINIMAP_DIMS);
+    let compass_pos = corner.clone()
+        .sub(new THREE.Vector3(MINIMAP_DIMS.x, 0.0))
+        .sub(COMPASS_DIMS);
 
-    // Render the HUD elements
+    // Renderr the HUD elements
     compass.update();
-    compass.render(renderer, new THREE.Vector2(0, 0), new THREE.Vector3(100, 100));
+    compass.render(renderer, compass_pos, COMPASS_DIMS);
     minimap.update();
-    minimap.render(renderer, new THREE.Vector2(100, 0), new THREE.Vector3(200, 200));
+    minimap.render(renderer, minimap_pos, MINIMAP_DIMS);
 
     // Reset the renderer's state since the HUD elements change
     // some settings
