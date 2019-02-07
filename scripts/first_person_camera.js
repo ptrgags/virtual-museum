@@ -11,7 +11,7 @@ class FirstPersonCamera {
         // on collision
         this.prev_position = this.camera.position.clone();
 
-        this.MOVE_DELTA = 0.5;
+        this.MOVE_DELTA = 1.0;
 
         // Store the last mouse position
         this.last_mouse_pos = new THREE.Vector2(

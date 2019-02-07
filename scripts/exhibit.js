@@ -332,7 +332,6 @@ class RaymarchExhibit extends Exhibit {
                     eye: {value: this.eye},
                     time: {value: 0.0},
                     //wall_center: {value: new THREE.Vector3(0.0, 0.0, 0.0);
-                    //wall_dims: {value: new Three.Vector3(
                 }
             ]),
             vertexShader: uv_vert,
@@ -358,6 +357,6 @@ class RaymarchExhibit extends Exhibit {
             return;
 
         this.uniforms.eye.value = this.eye;
-        this.uniforms.time.value = performance.now() - this.start_time;
+        this.uniforms.time.value = (performance.now() - this.start_time) / 1000.0;
     }
 }
