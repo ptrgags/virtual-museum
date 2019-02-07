@@ -43,6 +43,10 @@ class FirstPersonCamera {
         return new THREE.Vector3(-fwd.z, 0, fwd.x);
     }
 
+    get eye() {
+        return this.camera.position.clone();
+    }
+
     /**
      * Move parallel to the direction the camera is pointing
      */

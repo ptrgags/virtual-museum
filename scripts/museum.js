@@ -36,9 +36,10 @@ class Museum {
     make_exhibits() {
         // make the exhibits
         let exhibits = [
-            [[4, 4], new Exhibit()],
-            [[3, 4], new ToonExhibit()],
             [[4, 5], new Exhibit()],
+            [[3, 4], new ToonExhibit()],
+            [[4, 4], new RaymarchExhibit(
+                'west', 'shaders/raymarch_infinite.frag', this)],
             [[4, 6], new Exhibit()],
             [[3, 6], new Exhibit()],
             [[2, 6], new Exhibit()],
