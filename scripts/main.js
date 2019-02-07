@@ -4,6 +4,7 @@ var renderer;
 var museum;
 var pointer_locked = false;
 var compass;
+var minimap;
 
 window.onload = function() {
     museum = new Museum();
@@ -12,6 +13,8 @@ window.onload = function() {
     // Set up the HUD elements
     compass = new Compass(museum.camera);
     compass.load();
+    minimap = new Minimap(museum);
+    minimap.load();
 
     let w = window.innerWidth;
     let h = window.innerHeight;
@@ -42,9 +45,18 @@ let mouse_move = function(event) {
 let animate = function() {
     requestAnimationFrame(animate);
 
+    // Render the main view
     museum.update();
     museum.render(renderer);
 
+    // Render the HUD elements
     compass.update();
-    compass.render(renderer);
+    compass.render(renderer, new THREE.Vector2(0, 0), new THREE.Vector3(100, 100));
+    minimap.update();
+    minimap.render(renderer, new THREE.Vector2(100, 0), new THREE.Vector3(200, 200));
+
+    // Reset the renderer's state since the HUD elements change
+    // some settings
+    renderer.autoClear = true;
+    renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
 }

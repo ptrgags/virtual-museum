@@ -25,6 +25,10 @@ class MuseumLayout {
         return rows;
     }
 
+    get dimensions() {
+        return new THREE.Vector2(this.map_width, this.map_height);
+    }
+
     /**
      * Iterate over the layout and get a flattened array of booleans
      * that specify if there's a room at that location

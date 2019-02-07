@@ -25,6 +25,14 @@ class Museum {
         return this.layout.get_index(this.ENTRANCE);
     }
 
+    get minimap_buffer() {
+        return this.layout.minimap_buffer;
+    }
+
+    get map_dims() {
+        return this.layout.dimensions;
+    }
+
     make_exhibits() {
         // make the exhibits
         let exhibits = [
