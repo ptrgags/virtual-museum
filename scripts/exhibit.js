@@ -232,7 +232,7 @@ class Exhibit {
         const OFFSET_AMOUNT = 0.8 * this.ROOM_SIZE;
         const CAMERA_HEIGHT = 5.0;
         let backward_angle = -forward_angle;
-        let x = OFFSET_AMOUNT * Math.cos(backward_angle);
+        let x = -OFFSET_AMOUNT * Math.cos(backward_angle);
         let z = -OFFSET_AMOUNT * Math.sin(backward_angle);
         let offset = new THREE.Vector3(x, CAMERA_HEIGHT, z);
 

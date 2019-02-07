@@ -69,13 +69,11 @@ class FirstPersonCamera {
         
     }
 
-    reposition(new_pos, new_angle) {
+    reposition(new_pos) {
         this.prev_position = new_pos.clone();
         this.camera.position.copy(new_pos);
-        this.camera.rotation.y = new_angle - Math.PI / 2.0;
 
         this.prev_position = this.camera.position.clone();
-        this.yaw_pitch = new THREE.Vector2(0, 0);
     }
 
     /**
