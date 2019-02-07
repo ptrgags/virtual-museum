@@ -37,7 +37,11 @@ class Museum {
         // make the exhibits
         let exhibits = [
             [[4, 4], new Exhibit()],
-            [[3, 4], new ToonExhibit()]
+            [[3, 4], new ToonExhibit()],
+            [[4, 5], new Exhibit()],
+            [[4, 6], new Exhibit()],
+            [[3, 6], new Exhibit()],
+            [[2, 6], new Exhibit()],
         ];
 
         // Register the exhibits

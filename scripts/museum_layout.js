@@ -51,7 +51,7 @@ class MuseumLayout {
      */
     get_index(coords) {
         // x = row, y = col
-        return coords.x + this.map_width + coords.y;
+        return coords.x * this.map_width + coords.y;
     }
 
     /**
