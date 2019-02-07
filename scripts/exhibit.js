@@ -85,7 +85,8 @@ class Exhibit {
     }
 
     get wall_bboxes() {
-        return this.walls.map((x) => this.make_bbox(x));
+        let walls = [...this.walls.values()];
+        return walls.map((x) => this.make_bbox(x));
     }
 
     get obj_bboxes() {
@@ -117,7 +118,7 @@ class Exhibit {
 
         let objs = lights.concat(
             floor, 
-            this.walls, 
+            [...this.walls.values()], 
             [...this.doors.values()], 
             ceiling, 
             this.main_objs);
@@ -181,23 +182,32 @@ class Exhibit {
     }
 
     make_walls() {
-        let walls = [];
-        const NUM_WALLS = 4;
-        for (let i = 0; i < NUM_WALLS; i++) {
+        let walls = new Map();
+        for (let dir of this.DIRECTIONS.keys()) {
+            // direction to face to see the wall
+            let offset_angle = this.DIRECTIONS.get(dir);
+
+            // By default, PlaneGeometry has a normal in the +z direction.
+            // it must be rotated by an angle 90 degrees out of phase
+            // with the offset angle.
+            let rotation_angle = offset_angle - this.HALF_PI;
+
             // Unit square has width 2
             let geom = new THREE.PlaneGeometry(2, 2, 16);
             let plane = new THREE.Mesh(geom, this.materials.get('default'));
             plane.scale.x = this.ROOM_SIZE;
             plane.scale.y = this.ROOM_SIZE / 2.0; 
-            plane.rotation.y = i * this.HALF_PI;
+            plane.rotation.y = rotation_angle;
 
-            let offset_direction = this.HALF_PI + i * this.HALF_PI;
-            let x = this.ROOM_SIZE * Math.cos(offset_direction);
-            let z = -this.ROOM_SIZE * Math.sin(offset_direction);
+            // Place the plane at the proper end of the room
+            let x = this.ROOM_SIZE * Math.cos(offset_angle);
+            let z = -this.ROOM_SIZE * Math.sin(offset_angle);
             plane.position.set(x, this.ROOM_SIZE / 2.0, z);
 
-            walls.push(plane);
+            // Add it to the  map
+            walls.set(dir, plane);
         }
+
         return walls;
     }
 
@@ -283,4 +293,24 @@ class ToonExhibit extends Exhibit {
             this.knot.rotation.z += 0.01;
         }
     }
+}
+
+/**
+ * Room where one wall is a raymarched scene
+ */
+class RaymarchExhibit extends Exhibit {
+    // Pass in a map of
+    // wall direction (north|south|east|west) -> shader URL
+    constructor(wall, url) {
+        this.shader_wall = wall;
+        this.shader_url = url;
+    }
+
+    make_shader_requests() {
+        return [
+            ajax('shaders/uv_quad.vert'),
+            ajax(this.shader_url),
+        ];
+
+    };
 }
