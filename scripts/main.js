@@ -3,14 +3,19 @@ var renderer;
 
 var museum;
 var pointer_locked = false;
+var compass;
 
 window.onload = function() {
     museum = new Museum();
     museum.load();
 
+    // Set up the HUD elements
+    compass = new Compass(museum.camera);
+    compass.load();
+
     let w = window.innerWidth;
     let h = window.innerHeight;
-    renderer = new THREE.WebGLRenderer();
+    renderer = new THREE.WebGLRenderer({alpha: true});
     renderer.setSize(w, h);
     document.body.appendChild(renderer.domElement);
 
@@ -39,4 +44,7 @@ let animate = function() {
 
     museum.update();
     museum.render(renderer);
+
+    compass.update();
+    compass.render(renderer);
 }
