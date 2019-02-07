@@ -42,6 +42,7 @@ class MuseumLayout {
             for (let room of row)
                 buf.push(room !== null);
         }
+        return buf;
     }
 
     /**
