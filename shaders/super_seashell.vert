@@ -37,8 +37,8 @@ struct SuperSeashell {
     // The coil is in the shape of a superellipse, not a circle like a
     // typical helix. The two exponents can be controlled independently.
     // Exponents are interpolated linearly in logarithmic space
-    vec2 coil_n;
-    vec2 coil_m;
+    vec2 coil_p;
+    vec2 coil_q;
 
     // Cross Section Dimensions ======================================
 
@@ -103,6 +103,24 @@ float lerp(vec2 param, float t) {
     return mix(param.x, param.y, t);
 }
 
+/**
+ * linear interpolation in log space,
+ * or whatever it's called when you compute exp(lerp(ln(start), ln(end), t))
+ *
+ * This simplifies to 
+ * 
+ * start^(1 - t) * finish^t
+ */
+float loglerp(vec2 param, float t) {
+    return pow(param.x, 1.0 - t) * pow(param.y, t);
+}
+
+mat2 rotate(float theta) {
+    float c = cos(theta);
+    float s = sin(theta);
+    return mat2(c, s, -s, c);
+}
+
 vec3 seashell() {     
     // the u direction circulates around the cross section, though not
     // always in a circle ;)
@@ -110,31 +128,34 @@ vec3 seashell() {
     // depends highly on the parameters
 
     // Compute the cross section (a superellipse) of the coil
-    float twist = lerp(seashell_params.cross_section_twist, uv.y);
-    float theta = TWO_PI * uv.x + twist;
+    float theta = TWO_PI * uv.x;
     float r = lerp(seashell_params.cross_section_radius, uv.y);
-    // TODO: define explerp (or loglerp?) for the exponents
-    float m = seashell_params.cross_section_m.x;
-    float n = seashell_params.cross_section_n.x;
+    float m = loglerp(seashell_params.cross_section_m, uv.y); 
+    float n = loglerp(seashell_params.cross_section_n, uv.y); 
     // cross section is really measured in cylindrical coordinates:
     // cross_section.x -> radial direction
     // cross_section.y -> z direction
     vec2 cross_section = r * superellipse(theta, m, n);
 
+    // As an added twist (literally), rotate the cross section over the
+    // course of the spiral
+    float twist_amount = lerp(seashell_params.cross_section_twist, uv.y);
+    vec2 twisted = rotate(twist_amount) * cross_section;
+
     // Compute the center of the winding coil
     float phi = lerp(seashell_params.coil_angle, uv.y);
     float R = lerp(seashell_params.coil_radius, uv.y);
-    m = seashell_params.coil_m.x;
-    n = seashell_params.coil_n.x;
-    vec2 coil_shape = superellipse(phi, m, n);
+    float p = loglerp(seashell_params.coil_p, uv.y);
+    float q = loglerp(seashell_params.coil_q, uv.y);
+    vec2 coil_shape = superellipse(phi, p, q);
     float z = lerp(seashell_params.coil_z, uv.y);
 
     // Combine the above while fixing the coordinates so y is up instead
     // of z
     return vec3(
-        (R + cross_section.x) * coil_shape.x,
-        z + cross_section.y,
-        (R + cross_section.x) * -coil_shape.y);        
+        (R + twisted.x) * coil_shape.x,
+        z + twisted.y,
+        (R + twisted.x) * -coil_shape.y);        
 }
 
 void main() {
