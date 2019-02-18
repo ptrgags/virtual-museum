@@ -121,7 +121,7 @@ mat2 rotate(float theta) {
     return mat2(c, s, -s, c);
 }
 
-vec3 seashell() {     
+vec3 seashell(vec2 uv) {     
     // the u direction circulates around the cross section, though not
     // always in a circle ;)
     // The v direction goes along the coil of the seashell, a path which
@@ -158,17 +158,37 @@ vec3 seashell() {
         (R + twisted.x) * -coil_shape.y);        
 }
 
+/**
+ * Compute the normal numerically
+ */
+vec3 compute_normal(vec3 surface_point) {
+    const float h = 0.0001;
+    vec3 u_neighbor = seashell(uv + vec2(h, 0.0));
+    vec3 v_neighbor = seashell(uv + vec2(0.0, h));
+    vec3 u_deriv = (u_neighbor - surface_point) / h;
+    vec3 v_deriv = (v_neighbor - surface_point) / h;
+    vec3 normal = cross(u_deriv, v_deriv);
+    return normalize(normal);
+}
+
 void main() {
     // Ingore the coordinates of the seashell and use the uv coordinates
     // to find a point on the seashell
-    vec3 seashell_model = seashell();
+    vec3 seashell_model = seashell(uv);
 
     // TODO: Compute vertex normals analytically. This will be fun...
-    vec3 seashell_normal = normalize(seashell_model);
+    vec3 seashell_normal = compute_normal(seashell_model);
 
     // Now apply the matricies as usual
     fPositionView = vec3(modelViewMatrix * vec4(seashell_model, 1.0));
     fNormalView = vec3(modelViewMatrix * vec4(seashell_normal, 0.0));
+
+    // Flip the normal if it's facing away from the camera, this is
+    // a hollow surface
+    float normal_backwards = float(
+        dot(fNormalView, vec3(0.0, 0.0, 1.0)) < 0.0);
+    fNormalView = mix(fNormalView, -fNormalView, normal_backwards);
+
     fUv = uv;
     gl_Position = projectionMatrix * vec4(fPositionView, 1.0);
 }

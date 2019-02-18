@@ -18,6 +18,7 @@ void main() {
     // Simple Lambert shading
     for (int i = 0; i < NUM_POINT_LIGHTS; i++) {
         vec3 L = normalize(pointLights[i].position - fPositionView);
+
         vec3 lambert = pointLights[i].color * max(dot(L, N), 0.0);
         color += lambert;
     }
@@ -33,7 +34,7 @@ void main() {
     const vec3 SILHOUETTE_COLOR = vec3(0.0, 0.0, 0.0);
     float silhouette = 1.0 - step(SILHOUETTE_AMOUNT,  abs(VN));
 
-    //color = mix(toon, SILHOUETTE_COLOR, silhouette);
-    color = vec3(fUv, 0.0);
+    color = mix(toon, SILHOUETTE_COLOR, silhouette);
+    //color = vec3(fUv, 0.0);
     gl_FragColor = vec4(color, 1.0);
 }
