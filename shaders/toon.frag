@@ -8,6 +8,7 @@ uniform PointLight pointLights[NUM_POINT_LIGHTS];
 
 varying vec3 fPositionView;
 varying vec3 fNormalView;
+varying vec2 fUv;
 
 void main() {
     vec3 N = normalize(fNormalView);
@@ -32,6 +33,7 @@ void main() {
     const vec3 SILHOUETTE_COLOR = vec3(0.0, 0.0, 0.0);
     float silhouette = 1.0 - step(SILHOUETTE_AMOUNT,  abs(VN));
 
-    color = mix(toon, SILHOUETTE_COLOR, silhouette);
+    //color = mix(toon, SILHOUETTE_COLOR, silhouette);
+    color = vec3(fUv, 0.0);
     gl_FragColor = vec4(color, 1.0);
 }

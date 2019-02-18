@@ -7,3 +7,11 @@ let ajax = function(url) {
         xhr.send();
     });
 };
+
+let vec2 = function(x, y) {
+    return new THREE.Vector2(x, y);
+}
+
+let vec3 = function(x, y, z) {
+    return new THREE.Vector3(x, y);
+}
