@@ -13,5 +13,5 @@ let vec2 = function(x, y) {
 }
 
 let vec3 = function(x, y, z) {
-    return new THREE.Vector3(x, y);
+    return new THREE.Vector3(x, y, z);
 }

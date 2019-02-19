@@ -259,54 +259,6 @@ class Exhibit {
     }
 }
 
-
-class ToonExhibit extends Exhibit {
-    make_shader_requests() {
-        return [
-           ajax('shaders/super_seashell.vert'),
-           ajax('shaders/toon.frag'),
-        ];
-    }
-
-    make_materials(shader_text) {
-        let [seashell_vert, toon_frag] = shader_text;
-
-        let seashell = new SuperSeashell();
-        let seashell_mat = new THREE.ShaderMaterial({
-            uniforms: THREE.UniformsUtils.merge([
-                THREE.UniformsLib['lights'],
-                seashell.uniforms
-            ]),
-            name: 'seashell',
-            vertexShader: seashell_vert,
-            fragmentShader: toon_frag,
-            lights: true,
-            side: THREE.DoubleSide
-        });
-        this.materials.set('toon_seashell', seashell_mat);
-    }
-
-    make_main_objs() {
-        //let geometry = new THREE.TorusKnotGeometry(1.0, 0.1, 100, 16, 2, 5);
-        let geometry = new THREE.PlaneGeometry(1, 1, 24, 100);
-        let material = this.materials.get('toon_seashell')
-        this.knot = new THREE.Mesh(geometry, material); 
-        this.knot.position.y = this.ROOM_SIZE / 4;
-        //this.knot.rotation.x = Math.PI / 2;
-        return [this.knot];
-    }
-
-    update() {
-        // Make the knot rotate around
-        if (this.knot) {
-            //let params = this.knot.material.uniforms.seashell_params;
-            //params.value.cross_section_m.x += 0.1;
-            //this.knot.rotation.y += 0.01;
-            //this.knot.rotation.z += 0.01;
-        }
-    }
-}
-
 /**
  * Room where one wall is a raymarched scene
  *
