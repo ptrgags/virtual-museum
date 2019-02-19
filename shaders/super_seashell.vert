@@ -28,6 +28,15 @@ struct SuperSeashell {
     // Setting the final radius smaller adds a taper characteristic of 
     // seashells
     vec2 coil_radius;
+    // To allow for logarithmic spirals, I also throw in
+    // a e^(b(v)v) term where b(v) = loglerp(coil_logarithm, v).
+    // For true logarithmic spirals, set coil_radius to some constant
+    // (probably close to 0 for a tight spiral) and set coil_logarithm to
+    // a constant.
+    // For archemedian spirals, set coil_logarithm = vec2(0, 0) and
+    // set coil_radius.x != coil_radius.y. This introduces a linear
+    // taper
+    vec2 coil_logarithm;
     // The intiial and final angles for the main coil of the seashell.
     // The final angle can be larger than 2pi. This is necessary to get
     // helices and seashells of multiple turns
@@ -121,6 +130,17 @@ mat2 rotate(float theta) {
     return mat2(c, s, -s, c);
 }
 
+/**
+ * add e^(b(t)t) term to allow for logarithmic spirals
+ */
+float logarithmic_term()  {
+    // For true logarithmic spirals, b = constant. However, to keep the
+    // definition symmetric, we can have a start and end b value just
+    // for fun!
+    float b = loglerp(seashell_params.coil_logarithm, uv.y);
+    return exp(b * uv.y);
+}
+
 vec3 seashell(vec2 uv) {     
     // the u direction circulates around the cross section, though not
     // always in a circle ;)
@@ -144,7 +164,7 @@ vec3 seashell(vec2 uv) {
 
     // Compute the center of the winding coil
     float phi = lerp(seashell_params.coil_angle, uv.y);
-    float R = lerp(seashell_params.coil_radius, uv.y);
+    float R = lerp(seashell_params.coil_radius, uv.y) * logarithmic_term();
     float p = loglerp(seashell_params.coil_p, uv.y);
     float q = loglerp(seashell_params.coil_q, uv.y);
     vec2 coil_shape = superellipse(phi, p, q);
