@@ -262,7 +262,7 @@ class ToonExhibit extends Exhibit {
      * Template material for the seashell. It will be cloned and the
      * uniforms updated
      */
-    make_base_material(vert, frag) {
+    make_template_material(vert, frag) {
         return new THREE.ShaderMaterial({
             uniforms: THREE.UniformsUtils.merge([
                 THREE.UniformsLib['lights'],
@@ -285,7 +285,8 @@ class ToonExhibit extends Exhibit {
     make_materials(shader_text) {
         let [seashell_vert, toon_frag] = shader_text;
 
-        let seashell_mat = this.make_base_material(seashell_vert, toon_frag);
+        let seashell_mat = this.make_template_material(
+            seashell_vert, toon_frag);
 
         for (let seashell of TOON_SHELLS) {
             let mat_name = `toon-${seashell.name}`;
@@ -319,9 +320,8 @@ class ToonExhibit extends Exhibit {
         return results;
     }
 
-    make_main_objs() {
-        let objs = [];
-
+    make_seashells() {
+        let shells = [];
         for (let [i, pos] of this.grid_coords.entries()) {
             let seashell = TOON_SHELLS[i];
             let mat_name = `toon-${seashell.name}`;
@@ -342,10 +342,33 @@ class ToonExhibit extends Exhibit {
             mesh.scale.y = scale;
             mesh.scale.z = scale;
 
-            objs.push(mesh);
+            shells.push(mesh);
         }
+        return shells;
+    }
 
-        return objs;
+    make_stands() {
+        const STAND_SIZE = 0.1 * this.ROOM_SIZE;
+        let mat = this.materials.get('default');
+        let stands = [];
+        for (let [i, pos] of this.grid_coords.entries()) {
+            let geometry = new THREE.BoxGeometry(2, 2, 2);
+            let mesh = new THREE.Mesh(geometry, mat);
+
+            mesh.position.copy(pos);
+            mesh.position.y = STAND_SIZE / 2.0;
+            mesh.castShadow = true;
+
+            stands.push(mesh);
+        }
+        return stands;
+    }
+
+    make_main_objs() {
+        let seashells = this.make_seashells();
+        let stands = this.make_stands();
+
+        return seashells.concat(stands);
     }
 
     make_lights() {

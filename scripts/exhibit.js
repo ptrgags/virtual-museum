@@ -49,6 +49,11 @@ class Exhibit {
                 color: 0xffaa00,
                 specular: 0x010101,
                 shininess: 20
+            })],
+            ['floor', new THREE.MeshPhongMaterial({
+                color: 0x553300,
+                specular: 0x020202,
+                shininess: 40
             })]
         ]);
 
@@ -160,7 +165,7 @@ class Exhibit {
     make_floor() {
         // Unit square has width 2
         let geom = new THREE.PlaneGeometry(2, 2, 16);
-        let plane = new THREE.Mesh(geom, this.materials.get('default'));
+        let plane = new THREE.Mesh(geom, this.materials.get('floor'));
         plane.receiveShadow = true;
         plane.scale.x = this.ROOM_SIZE;
         plane.scale.y = this.ROOM_SIZE;
