@@ -295,16 +295,34 @@ class ToonExhibit extends Exhibit {
         }
     }
 
+    /**
+     *
+     */
+    get grid_coords() {
+        const ROWS = 4;
+        const COLS = 4;
+        const origin = vec3(-1, 0, -1).multiplyScalar(0.75 * this.ROOM_SIZE);
+        const delta = vec3(1, 0, 1).multiplyScalar(0.5 * this.ROOM_SIZE);
+
+        let results = [];
+        for (let i = 0; i < ROWS * COLS; i++) { 
+            // Compute coordinates in index space
+            let z = Math.floor(i / COLS);
+            let x = i % COLS;
+            let y = 0;
+
+            // Create an offset vector in world space
+            let offset = vec3(x, 0, z).multiply(delta);
+            let pos = origin.clone().add(offset);
+            results.push(pos);
+        }
+        return results;
+    }
+
     make_main_objs() {
         let objs = [];
 
-        // Set up a grid
-        let origin = vec3(-1, 0, -1).multiplyScalar(0.75 * this.ROOM_SIZE);
-        let delta = vec3(1, 0, 1).multiplyScalar(0.5 * this.ROOM_SIZE);
-
-        const ROWS = 4;
-        const COLS = 4;
-        for (let i = 0; i < ROWS * COLS; i++) {
+        for (let [i, pos] of this.grid_coords.entries()) {
             let seashell = TOON_SHELLS[i];
             let mat_name = `toon-${seashell.name}`;
             let material = this.materials.get(mat_name);
@@ -314,26 +332,39 @@ class ToonExhibit extends Exhibit {
             let geometry = new THREE.PlaneGeometry(1, 1, 24, 100);
 
             let mesh = new THREE.Mesh(geometry, material);
-
-            // Position the mesh in the room
-            let z = Math.floor(i / COLS);
-            let x = i % COLS;
-            let offset = vec3(x, 0, z).multiply(delta);
-            let pos = origin.clone().add(offset);
-            pos.y = this.ROOM_SIZE / 8;
+            mesh.castShadow = true;
+        
             mesh.position.copy(pos);
+            mesh.position.y = 0.2 * this.ROOM_SIZE;
 
             let scale = this.ROOM_SIZE / 16
             mesh.scale.x = scale;
             mesh.scale.y = scale;
             mesh.scale.z = scale;
 
-
             objs.push(mesh);
-
         }
 
         return objs;
+    }
+
+    make_lights() {
+        let lights = [];
+        let helpers = [];
+
+        let default_lights = super.make_lights();
+
+        for (let [i, pos] of this.grid_coords.entries()) {
+            let color = Math.floor(Math.random() * 0x1000000);
+            let light = new THREE.PointLight(color, 0.1, 10.0);
+            light.position.copy(pos);
+            light.position.y = 0.45 * this.ROOM_SIZE;
+            lights.push(light);
+
+            let helper = new THREE.PointLightHelper(light);
+            helpers.push(helper);
+        }
+        return lights.concat(default_lights, helpers);
     }
 
     update() {
