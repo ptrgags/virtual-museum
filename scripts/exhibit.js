@@ -49,6 +49,11 @@ class Exhibit {
                 color: 0xffaa00,
                 specular: 0x010101,
                 shininess: 20
+            })],
+            ['floor', new THREE.MeshPhongMaterial({
+                color: 0x553300,
+                specular: 0x020202,
+                shininess: 40
             })]
         ]);
 
@@ -129,22 +134,39 @@ class Exhibit {
     }
 
     make_lights() {
-        let white_light = new THREE.PointLight(0xFFFFFF, 0.8, 100);
-        white_light.position.set(3.0, 8.0, -3.0);
+        let lights = [];
+        let helpers = [];
+        // A gentle light in each corner of the room
+        for (let i of [1, -1]) {
+            for (let j of [1, -1]) {
+                for (let k of [1, -1]) {
+                    let x = 0.8 * this.ROOM_SIZE * i;
+                    let y = 0.5 * this.ROOM_SIZE + j * 0.4 * this.ROOM_SIZE;
+                    let z = 0.8 * this.ROOM_SIZE * k;
 
-        let red_light = new THREE.PointLight(0x880000, 0.5, 100);
-        red_light.position.set(-3.0, 1.0, 2.0);
+                    let offset = vec3(x, y, z);
+                    let light = new THREE.PointLight(0xFFFFFF, 0.2, 2.0 * this.ROOM_SIZE);
 
-        let blue_light = new THREE.PointLight(0x00CCFF, 0.4, 100);
-        blue_light.position.set(4.0, 5.0, 5.0);
+                    light.position.copy(offset);
+                    lights.push(light);
 
-        return [white_light, red_light, blue_light];
+                    let helper = new THREE.PointLightHelper(light);
+                    helpers.push(helper);
+                }
+            }
+        }
+
+        let ambient = new THREE.AmbientLight(0xAAEEFF, 0.5);
+        lights.push(ambient);
+
+        return lights.concat(helpers);
     }
 
     make_floor() {
         // Unit square has width 2
         let geom = new THREE.PlaneGeometry(2, 2, 16);
-        let plane = new THREE.Mesh(geom, this.materials.get('default'));
+        let plane = new THREE.Mesh(geom, this.materials.get('floor'));
+        plane.receiveShadow = true;
         plane.scale.x = this.ROOM_SIZE;
         plane.scale.y = this.ROOM_SIZE;
         plane.rotation.x = -this.HALF_PI;
@@ -256,42 +278,6 @@ class Exhibit {
 
     update() {
         // called once a frame
-    }
-}
-
-class ToonExhibit extends Exhibit {
-    make_shader_requests() {
-        return [
-           ajax('shaders/toon.vert'),
-           ajax('shaders/toon.frag'),
-        ];
-    }
-
-    make_materials(shader_text) {
-        let [toon_vert, toon_frag] = shader_text;
-        let toon_mat = new THREE.ShaderMaterial({
-            uniforms: THREE.UniformsLib['lights'],
-            vertexShader: toon_vert,
-            fragmentShader: toon_frag,
-            lights: true
-        });
-        this.materials.set('toon', toon_mat);
-    }
-
-    make_main_objs() {
-        let geometry = new THREE.TorusKnotGeometry(1.0, 0.1, 100, 16, 2, 5);
-        let material = this.materials.get('toon')
-        this.knot = new THREE.Mesh(geometry, material); 
-        this.knot.position.y = this.ROOM_SIZE / 4;
-        return [this.knot];
-    }
-
-    update() {
-        // Make the knot rotate around
-        if (this.knot) {
-            this.knot.rotation.y += 0.01;
-            this.knot.rotation.z += 0.01;
-        }
     }
 }
 

@@ -8,6 +8,7 @@ uniform PointLight pointLights[NUM_POINT_LIGHTS];
 
 varying vec3 fPositionView;
 varying vec3 fNormalView;
+varying vec2 fUv;
 
 void main() {
     vec3 N = normalize(fNormalView);
@@ -17,6 +18,7 @@ void main() {
     // Simple Lambert shading
     for (int i = 0; i < NUM_POINT_LIGHTS; i++) {
         vec3 L = normalize(pointLights[i].position - fPositionView);
+
         vec3 lambert = pointLights[i].color * max(dot(L, N), 0.0);
         color += lambert;
     }
@@ -33,5 +35,6 @@ void main() {
     float silhouette = 1.0 - step(SILHOUETTE_AMOUNT,  abs(VN));
 
     color = mix(toon, SILHOUETTE_COLOR, silhouette);
+    //color = vec3(fUv, 0.0);
     gl_FragColor = vec4(color, 1.0);
 }
