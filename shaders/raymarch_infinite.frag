@@ -17,8 +17,10 @@ struct PointLight {
 };
 
 //uniform vec3 eye;
-uniform float time;
 uniform PointLight pointLights[NUM_POINT_LIGHTS];
+uniform float time;
+uniform vec3 eye;
+uniform float room_angle;
 
 varying vec2 fUv;
 
@@ -117,28 +119,46 @@ vec3 fog(vec3 color, float dist, float scale) {
 
 }
 
+mat3 rotate_y(float theta) {
+    float c = cos(theta);
+    float s = sin(theta);
+    return mat3(
+        c, 0, -s,
+        0, 1, 0,
+        s, 0, c);
+}
+
+/**
+ * Wall coordinate relative to the room center in the standard orientation
+ * of down the z axis.
+ */
+vec3 wall_coord() {
+    float x = 2.0 * fUv.x - 1.0;
+    float y = fUv.y;
+    float z = -1.0;
+    return vec3(x, y, z);
+}
+
+
 void main() {
-    // Center the UV coordinates and account for the aspect ratio
-    vec2 centered_uv = fUv - 0.5;
-    centered_uv.x *= ASPECT_RATIO;
+    // Standardize the wall and eye position so the wall with the screen
+    // is considered the -z direction
+    vec3 standard_wall = wall_coord();
+    vec3 standard_eye = rotate_y(-room_angle) * eye;
 
-    // TODO: Use the real wall dimensions and eye instead of a constant
-	// one so the scene reacts to the player
-    vec3 fake_eye = vec3(0.0, 0.0, -6.5);
-    vec3 image = vec3(centered_uv, -3.5);
-    vec3 direction = normalize(image - fake_eye);
+    // Direction from eye to the wall coordinate
+    vec3 direction = normalize(standard_wall - standard_eye);
 
-    // Move the camera through an aisle between the infinite grid of shapes
-    vec3 aisle = vec3(1.0, 0.0, 0.0);
-    vec3 movement = time * vec3(0.0, 1.0, 10.0);
-    
-    // Do the raymarching
-    RaymarchResults results = raymarch(fake_eye + aisle + movement, direction);
+
+    // Move through the field of spheres
+    vec3 aisle_offset = vec3(1.0, 0.0, 0.0);
+    vec3 movement = 0.5 * time * vec3(0.0, 1.0, -10.0);
+    RaymarchResults results = raymarch(standard_eye + aisle_offset + movement, direction);
 
     // Apply diffuse lighting and fog
     vec3 shaded = lambert_shading(results.pos);
     vec3 foggy = fog(shaded, results.depth, 0.05);
    
     // Output to screen
-    gl_FragColor = vec4(foggy, 1.0);
+    gl_FragColor = vec4(foggy, 1.0); 
 }
