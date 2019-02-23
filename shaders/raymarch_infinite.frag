@@ -34,20 +34,39 @@ float sdf_sphere(vec3 pos, float radius) {
     return length(pos) - radius;
 }
 
+float sdf_superellipsoid(vec3 pos, vec2 exponents) {
+    vec2 xz = pow(abs(pos.xz), vec2(exponents.x));
+    float sum = xz.x + xz.y; 
+    float sum_pow = pow(sum, exponents.y / exponents.x);
+    float y = pow(abs(pos.y), exponents.y);
+    return sum_pow + y - 1.0 + 0.8;
+}
+
 // Signed distance function represents the distance
 // to the nearest surface in the scene
 // + means outside, - means inside
 float sdf(vec3 pos) {
     vec3 cells = repeat_domain(pos, 2.0);
-    float sphere = sdf_sphere(cells, 0.45);
+    float sphere = sdf_sphere(cells, 0.5);//sdf_superellipsoid(cells, vec2(8.0, 8.0));
     return sphere;
 }
 
+/**
+ * Numerically compute the gradient to compute the normal
+ */
 vec3 get_normal(vec3 pos) {
-    // Find the coordinates relative to the center of the current cell
-    vec3 cells = repeat_domain(pos, 2.0);
-    //For a sphere, the normal is radially outward from the center
-    return normalize(cells);
+    const float h = 0.001; 
+
+    // Only computing the forward difference quotient since it saves
+    // sdf lookups
+    float f_here = sdf(pos);
+    vec3 diff = vec3(
+        sdf(pos + vec3(h, 0, 0)) - sdf(pos + vec3(-h, 0, 0)),
+        sdf(pos + vec3(0, h, 0)) - sdf(pos + vec3(0, -h, 0)),
+        sdf(pos + vec3(0, 0, h)) - sdf(pos + vec3(0, 0, -h)));
+
+    // No need to divide by h if we're going to normalize it anyway
+    return normalize(diff);
 }
 
     
