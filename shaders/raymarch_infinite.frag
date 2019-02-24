@@ -26,13 +26,7 @@ struct RaymarchResults {
     float iters;
     float depth;
     vec3 pos;
-};
-
-// Point lights provided by Three.js
-struct PointLight {
     vec3 color;
-    vec3 position; // in view space
-    float distance;
 };
 
 uniform float time;
@@ -100,6 +94,19 @@ vec3 get_normal(vec3 pos) {
     return normalize(diff);
 }
 
+// Sinusoid that varies on the range [0, 1]
+float haversin(float x) {
+    return 0.5 - 0.5 * cos(x);
+}
+
+vec3 cell_color(vec3 pos) {
+    vec3 coords = floor(pos - 0.5);
+    float r = haversin(coords.x * 30.0 - 0.5 * time);
+    float g = haversin(coords.y * 11.0 - 0.5 * time);
+    float b = haversin(coords.z * 19.0 - 0.5 * time);
+    return vec3(r, g, b);
+}
+
     
 // Perform raymarching.
 RaymarchResults raymarch(vec3 eye, vec3 direction) {
@@ -121,6 +128,7 @@ RaymarchResults raymarch(vec3 eye, vec3 direction) {
             results.iters = i;
             results.depth = t;
             results.pos = ray;
+            results.color = cell_color(results.pos);
             return results;
             
         } else {
@@ -136,6 +144,7 @@ RaymarchResults raymarch(vec3 eye, vec3 direction) {
     results.iters = MAX_ITERATIONS;
     results.depth = t;
     results.pos = eye + t * direction;
+    results.color = vec3(0.0);
 	return results;
 }
 
@@ -180,11 +189,11 @@ vec3 lambert_shading(vec3 pos, vec3 box_pos, vec3 surface_color) {
     LIGHTS[4] = vec3(0.0, 0.0, -1.0);
     LIGHTS[5] = vec3(0.0, 1.0, -1.0);
 
-    const float LIGHT_INTENSITY = 0.1;
+    const float LIGHT_INTENSITY = 0.3;
     const vec3 AMBIENT_LIGHT = vec3(0.3);
 
     // Lambert shading
-    vec3 color = AMBIENT_LIGHT;
+    vec3 color = 0.1 * surface_color;
     for (int i = 0; i < NUM_LIGHTS; i++) {
         vec3 light_dir = box_pos + LIGHTS[i] - pos;
         vec3 L = normalize(box_pos + LIGHTS[i] - pos);
@@ -205,7 +214,7 @@ vec3 lambert_shading(vec3 pos, vec3 box_pos, vec3 surface_color) {
  */
 vec3 fog(vec3 color, float dist, float scale) {
     float fog_amount = 1.0 - exp(-dist * scale);
-    vec3 fog_color = vec3(0.5, 0.5, 0.5);
+    vec3 fog_color = vec3(0.5);
     return mix(color, fog_color, fog_amount);
 
 }
@@ -239,7 +248,7 @@ void main() {
     RaymarchResults results = raymarch(box_pos + standard_eye, direction);
 
     // Apply diffuse lighting and fog
-    vec3 shaded = lambert_shading(results.pos, box_pos, vec3(1.0, 0.0, 0.0));
+    vec3 shaded = lambert_shading(results.pos, box_pos, results.color);
     vec3 foggy = fog(shaded, results.depth, 0.05);
    
     // Output to screen
