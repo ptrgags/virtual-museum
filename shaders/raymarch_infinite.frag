@@ -1,6 +1,7 @@
 #define MAX_ITERATIONS 500.0
 #define EPSILON 0.0001
 #define ASPECT_RATIO 2.0
+#define FOUR_PI 12.56637
 
 mat3 rotate_y(float theta) {
     float c = cos(theta);
@@ -34,8 +35,6 @@ struct PointLight {
     float distance;
 };
 
-//uniform vec3 eye;
-uniform PointLight pointLights[NUM_POINT_LIGHTS];
 uniform float time;
 uniform vec3 eye;
 uniform float room_angle;
@@ -140,26 +139,67 @@ RaymarchResults raymarch(vec3 eye, vec3 direction) {
 	return results;
 }
 
+/**
+ * March from surface to light surface and see if we hit anything
+ * return 0 if we hit something, 1 otherwise
+ */
+float is_visible(vec3 pos, vec3 light_dir) {
+    float t = 5.0 * EPSILON;
+    float max_t = length(light_dir);
+    vec3 L = normalize(light_dir);
+    const int MAX_STEPS = 50;
+    for (int i = 0; i < MAX_STEPS; i++) {
+        vec3 ray = pos + t * L;
+        float dist = sdf(ray);
+        if (dist < EPSILON) {
+            return 0.0;
+        } else {
+            t += dist;
+        }
+
+        if (t >= max_t)
+            break;
+    }
+    return 1.0;
+}
+
 
 /**
  * Apply simple lambert shading to a point in the scene
  */
-vec3 lambert_shading(vec3 pos) {
+vec3 lambert_shading(vec3 pos, vec3 box_pos, vec3 surface_color) {
     vec3 N = get_normal(pos);
 
-    // Lambert shading
-    vec3 color = vec3(0.0);
-    for (int i = 0; i < NUM_POINT_LIGHTS; i++) {
-        vec3 L = normalize(pointLights[i].position - pos);
-        vec3 lambert = pointLights[i].color * max(dot(L, N), 0.0);
-        color += lambert;
-    }
+    // lights are specified relative to the current box position
+    const int NUM_LIGHTS = 6;
+    vec3 LIGHTS[NUM_LIGHTS];
+    LIGHTS[0] = vec3(-1.0, 0.0, -1.0);
+    LIGHTS[1] = vec3(1.0, 0.0, -1.0);
+    LIGHTS[2] = vec3(-1.0, 1.0, -1.0);
+    LIGHTS[3] = vec3(1.0, 1.0, -1.0);
+    LIGHTS[4] = vec3(0.0, 0.0, -1.0);
+    LIGHTS[5] = vec3(0.0, 1.0, -1.0);
 
+    const float LIGHT_INTENSITY = 0.1;
+    const vec3 AMBIENT_LIGHT = vec3(0.3);
+
+    // Lambert shading
+    vec3 color = AMBIENT_LIGHT;
+    for (int i = 0; i < NUM_LIGHTS; i++) {
+        vec3 light_dir = box_pos + LIGHTS[i] - pos;
+        vec3 L = normalize(box_pos + LIGHTS[i] - pos);
+        float dist_sqr = dot(light_dir, light_dir);
+
+        //float visibility = is_visible(pos, light_dir); 
+
+        float lambert = LIGHT_INTENSITY /** visibility*/ * max(dot(L, N), 0.0);
+        color += surface_color * lambert / dist_sqr;
+    }
     return color;
 }
 
 /**
- * Simplee Fog equation based on Iñigo Quìles' article:
+ * Simplee Fog equation based on Íñigo Quíles' article:
  *
  * http://www.iquilezles.org/www/articles/fog/fog.htm
  */
@@ -195,10 +235,11 @@ void main() {
     // Move through the field of spheres
     vec3 aisle_offset = vec3(0.0, -0.25, 0.0);
     vec3 movement = time * vec3(0.0, 0.0, -1.0);
-    RaymarchResults results = raymarch(standard_eye + aisle_offset + movement, direction);
+    vec3 box_pos = aisle_offset + movement;
+    RaymarchResults results = raymarch(box_pos + standard_eye, direction);
 
     // Apply diffuse lighting and fog
-    vec3 shaded = lambert_shading(results.pos);
+    vec3 shaded = lambert_shading(results.pos, box_pos, vec3(1.0, 0.0, 0.0));
     vec3 foggy = fog(shaded, results.depth, 0.05);
    
     // Output to screen
