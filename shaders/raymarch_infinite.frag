@@ -2,6 +2,24 @@
 #define EPSILON 0.0001
 #define ASPECT_RATIO 2.0
 
+mat3 rotate_y(float theta) {
+    float c = cos(theta);
+    float s = sin(theta);
+    return mat3(
+        c, 0, -s,
+        0, 1, 0,
+        s, 0, c);
+}
+
+mat3 rotate_z(float theta) {
+    float c = cos(theta);
+    float s = sin(theta);
+    return mat3(
+        c, s, 0,
+        -s, 0, 0,
+        0, 0,  1);
+}
+
 // Capture information about the rendered scene
 struct RaymarchResults {
     float iters;
@@ -34,21 +52,35 @@ float sdf_sphere(vec3 pos, float radius) {
     return length(pos) - radius;
 }
 
-float sdf_superellipsoid(vec3 pos, vec2 exponents) {
-    vec2 xz = pow(abs(pos.xz), vec2(exponents.x));
-    float sum = xz.x + xz.y; 
-    float sum_pow = pow(sum, exponents.y / exponents.x);
-    float y = pow(abs(pos.y), exponents.y);
-    return sum_pow + y - 1.0 + 0.8;
+/**
+ * Distance to infinite cylinder with axis in the y direction
+ */
+float sdf_cylinder(vec3 pos, float radius) {
+    float s = length(pos.xz);
+    return s - radius;
 }
+
+#define sdf_union min
+#define sdf_intersecion max
+#define sdf_sub(a, b) max((a), -(b))
 
 // Signed distance function represents the distance
 // to the nearest surface in the scene
 // + means outside, - means inside
 float sdf(vec3 pos) {
     vec3 cells = repeat_domain(pos, 2.0);
-    float sphere = sdf_sphere(cells, 0.5);//sdf_superellipsoid(cells, vec2(8.0, 8.0));
-    return sphere;
+    float sphere = sdf_sphere(cells, 0.5);
+
+    // Make an infininite lattice of cylinders 
+    const float GRID_THICKNESS = 0.06;
+    vec3 cells2 = repeat_domain(pos, 0.25);
+    float cyl_y = sdf_cylinder(cells2, GRID_THICKNESS);
+    float cyl_z = sdf_cylinder(cells2.yzx, GRID_THICKNESS);
+    float cyl_x = sdf_cylinder(cells2.zxy, GRID_THICKNESS);
+    float cylinders = sdf_union(cyl_y, cyl_z);
+    cylinders = sdf_union(cylinders, cyl_x);
+
+    return sdf_sub(sphere, cylinders);
 }
 
 /**
@@ -138,14 +170,6 @@ vec3 fog(vec3 color, float dist, float scale) {
 
 }
 
-mat3 rotate_y(float theta) {
-    float c = cos(theta);
-    float s = sin(theta);
-    return mat3(
-        c, 0, -s,
-        0, 1, 0,
-        s, 0, c);
-}
 
 /**
  * Wall coordinate relative to the room center in the standard orientation
@@ -168,10 +192,9 @@ void main() {
     // Direction from eye to the wall coordinate
     vec3 direction = normalize(standard_wall - standard_eye);
 
-
     // Move through the field of spheres
-    vec3 aisle_offset = vec3(1.0, 0.0, 0.0);
-    vec3 movement = 0.5 * time * vec3(0.0, 1.0, -10.0);
+    vec3 aisle_offset = vec3(0.0, -0.25, 0.0);
+    vec3 movement = time * vec3(0.0, 0.0, -1.0);
     RaymarchResults results = raymarch(standard_eye + aisle_offset + movement, direction);
 
     // Apply diffuse lighting and fog
