@@ -15,3 +15,7 @@ let vec2 = function(x, y) {
 let vec3 = function(x, y, z) {
     return new THREE.Vector3(x, y, z);
 }
+
+let haversin = function(x) {
+    return 0.5 + 0.5 * Math.cos(x);
+}
