@@ -2,14 +2,14 @@
  * Julia Set Sphere PARTIAL fragment shader
  *
  * This is an escape time rendering of a Julia set that allows for rational
- * complex functions with degrees up to 8 in both numerator and denominator:
+ * complex functions with degrees up to 4 in both numerator and denominator:
  *
  *        az^8 + bz^7 + cz^6 + dz^5 + ez^4 + ez^3 + fz^2 + gz + h
  * f(z) = -------------------------------------------------------
  *        iz^8 + jz^7 + kz^6 + lz^5 + mz^4 + nz^3 + oz^2 + pz + q
  */
 
-#define MAX_DEGREE 8
+#define MAX_DEGREE 4
 #define NUM_TERMS (MAX_DEGREE + 1)
 
 /**
@@ -105,6 +105,14 @@ void main() {
 
     EscapeTimeResults results = escape_time(z);
 
+    float percent = results.iterations / float(MAX_ITERATIONS);
+    float angle = atan(results.position.y, results.position.x);
+    float wave = sin(3.0 * angle);
+
+    vec4 background = vec4(1.0, 1.0, 1.0, 0.1);
+    vec4 colored = vec4(wave,  0.0, 0.0, 1.0);
+
+
     //float circle = step(2.0, length(z));
-    gl_FragColor = vec4(results.iterations / float(MAX_ITERATIONS), 0.0, 0.0, 1.0);
+    gl_FragColor = mix(background, colored, results.escaped);
 }

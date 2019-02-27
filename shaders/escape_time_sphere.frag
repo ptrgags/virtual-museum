@@ -32,6 +32,7 @@ vec2 to_complex(vec2 angles) {
 struct EscapeTimeResults {
     float iterations;
     vec2 position;
+    float escaped;
 };
 
 // Function to iterate
@@ -46,11 +47,13 @@ EscapeTimeResults escape_time(vec2 z) {
         if (dot(pos, pos) > radius_squared) {
             results.iterations = float(i);
             results.position = pos;
+            results.escaped = 1.0;
             return results;
         }
     }
     results.iterations = float(MAX_ITERATIONS);
     results.position = pos;
+    results.escaped = 0.0;
     return results; 
 }
 

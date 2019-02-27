@@ -23,8 +23,8 @@ class JuliaSphereExhibit extends Exhibit {
                 c: {value: vec2(.285, .01)},
                 escape_radius: {value: 2.0},
                 // z^2 + c 
-                numerator_coeffs: {value: [0, 0, 1, 0, 0, 0, 0, 0]},
-                denominator_coeffs: {value: [1, 0, 0, 0, 0, 0, 0, 0]}
+                numerator_coeffs: {value: [0, 0, 1, 0, 0]},
+                denominator_coeffs: {value: [1, 0, 0, 0, 0]}
             },
             name: 'julia_sphere',
             vertexShader: vert,
@@ -41,6 +41,8 @@ class JuliaSphereExhibit extends Exhibit {
 
         let base_mat = this.make_template_material(
             vert, header_frag + '\n' + footer_frag);
+
+        base_mat.transparent = true;
 
         this.materials.set('julia', base_mat);
 
@@ -61,12 +63,20 @@ class JuliaSphereExhibit extends Exhibit {
         let mat = this.materials.get('julia');
 
         let sphere = new THREE.Mesh(geom, mat);
-        sphere.position.y = this.ROOM_SIZE / 2.0;
-        sphere.scale.multiplyScalar(3.0);
+        sphere.position.y = 0.4 * this.ROOM_SIZE;
+        sphere.scale.multiplyScalar(5.0);
+
 
         return [sphere];
     }
 
+
+
     update() {
+        let time = performance.now() / 1000.0;
+        let freq = 0.1;
+        let uniforms = this.materials.get('julia').uniforms;
+        uniforms.numerator_coeffs.value[2] = 0.95 + 0.05 * haversin(freq * time);
+        uniforms.numerator_coeffs.value[3] = 0.01 * haversin(2.0 * freq * time);
     }
 }
