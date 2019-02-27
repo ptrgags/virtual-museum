@@ -4,7 +4,7 @@ class Museum {
         this.make_exhibits();
 
         // Specify the starting room in index space
-        this.ENTRANCE = new THREE.Vector2(4, 5);
+        this.ENTRANCE = new THREE.Vector2(4, 4);
         this.current_room = this.ENTRANCE;
 
         // Keep a single moveable camera around.
