@@ -29,7 +29,7 @@ class JuliaSphereExhibit extends Exhibit {
                 escape_radius: {value: 2.0},
                 // z^2 + c 
                 numerator_coeffs: {value: [0, 0, 1, 0, 0]},
-                denominator_coeffs: {value: [1, 0, 0, 0, 0]}
+                denominator_coeffs: {value: [0, 0, 1.5, 0, 0]}
             },
             name: 'julia_sphere',
             vertexShader: vert,
@@ -47,7 +47,6 @@ class JuliaSphereExhibit extends Exhibit {
 
         let base_mat = this.make_template_material(
             vert, header_frag + '\n' + footer_frag);
-
         base_mat.transparent = true;
 
         this.materials.set('julia', base_mat);
@@ -108,6 +107,7 @@ class JuliaSphereExhibit extends Exhibit {
         //uniforms.numerator_coeffs.value[2] = 0.95 + 0.05 * haversin(freq * time);
         //uniforms.numerator_coeffs.value[3] = 0.01 * haversin(2.0 * freq * time);
         uniforms.numerator_coeffs.value = this.make_coeffs(0.0);
+        //uniforms.denominator_coeffs.value = this.make_coeffs(0.5);
 
         uniforms.c.value = this.complex_point;
     }

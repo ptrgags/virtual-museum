@@ -110,7 +110,7 @@ void main() {
     float wave = sin(3.0 * angle);
 
     vec4 background = vec4(1.0, 1.0, 1.0, 0.1);
-    vec4 colored = vec4(wave,  0.0, 0.0, 1.0);
+    vec4 colored = vec4(wave, 0.0, 0.0, 1.0);
 
 
     //float circle = step(2.0, length(z));
