@@ -99,6 +99,10 @@ vec2 f(vec2 z) {
     return cdiv(top_sum, bottom_sum) + c;
 }
 
+float haversin(float x) {
+    return 0.5 + 0.5 * cos(x);
+}
+
 void main() {
     vec2 angles = to_angles(fUv);
     vec2 z = to_complex(angles);
@@ -107,12 +111,11 @@ void main() {
 
     float percent = results.iterations / float(MAX_ITERATIONS);
     float angle = atan(results.position.y, results.position.x);
-    float wave = sin(3.0 * angle);
+    float wave = sin(5.0 * angle);
 
-    vec4 background = vec4(1.0, 1.0, 1.0, 0.1);
-    vec4 colored = vec4(wave, 0.0, 0.0, 1.0);
+    vec3 color = wave * vec3(0.0, 0.45, 0.33);
 
 
     //float circle = step(2.0, length(z));
-    gl_FragColor = mix(background, colored, results.escaped);
+    gl_FragColor = vec4(color, haversin(angle));
 }
