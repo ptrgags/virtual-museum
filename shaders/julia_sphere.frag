@@ -1,67 +1,110 @@
-#define PI 3.1415
-#define MAX_ITERATIONS 300
-varying vec2 fUv;
-
 /**
- * Convert uv coordinates to spherical coordinates
- * theta = zenith angle (angle from the north pole)
- * phi = azimuth angle (angle around the equator)
- */
-vec2 to_angles(vec2 uv) {
-    float theta = PI * (1.0 - uv.y);
-    float phi = 2.0 * PI * uv.x;
-    return vec2(theta, phi);
-}
-
-/**
- * Project the Riemann sphere to the complex plane to get a complex number.
- * the point on the sphere are given by the angles (theta, phi) (see to_angles)
+ * Julia Set Sphere PARTIAL fragment shader
  *
- * z = cot(theta/2) e^(i * theta)
+ * This is an escape time rendering of a Julia set that allows for rational
+ * complex functions with degrees up to 8 in both numerator and denominator:
+ *
+ *        az^8 + bz^7 + cz^6 + dz^5 + ez^4 + ez^3 + fz^2 + gz + h
+ * f(z) = -------------------------------------------------------
+ *        iz^8 + jz^7 + kz^6 + lz^5 + mz^4 + nz^3 + oz^2 + pz + q
  */
-vec2 to_complex(vec2 angles) {
-    // e^(i * theta)
-    vec2 phase_factor = vec2(cos(angles.y), sin(angles.y));
-    // r = cot(theta / 2)
-    float modulus = 1.0 / tan(0.5 * angles.x);
-    return modulus * phase_factor;
+
+#define MAX_DEGREE 8
+#define NUM_TERMS (MAX_DEGREE + 1)
+
+/**
+ * Complex conjugation:
+ * (a + bi)* = (a - bi)
+ */
+vec2 conj(vec2 z) {
+    return vec2(z.x, -z.y);
 }
 
-struct EscapeTimeResults {
-    float iterations;
-    vec2 position;
-};
+/**
+ * Complex multiplication
+ * 
+ * (a + bi)(c + di) = (ac - bd) + (ad + bc)i
+ *
+ * The matrix representation trick I learned from Fabrice Neyret's
+ * Shadertoy Unofficial Wordpress site:
+ * https://shadertoyunofficial.wordpress.com/2019/01/02/programming-tricks-in-shadertoy-glsl/
+ */
+vec2 cmult(vec2 z, vec2 w) {
+    return mat2(z.xy, -z.y, z.x) * w;
+}
 
-// Function to iterate
-vec2 f(vec2 z);
+/**
+ * Complex inverse:
+ *
+ * 1/z = z* / |z|^2
+ *
+ * and |z|^2 = z * z* = (a^2 + b^2) = dot(z, z)
+ */
+vec2 cinv(vec2 z) {
+    return conj(z) / dot(z, z);
+}
 
-EscapeTimeResults escape_time(vec2 z, float radius) {
-    float radius_squared = radius * radius;
-    vec2 pos = z;
-    EscapeTimeResults results;
-    for (int i = 0; i < MAX_ITERATIONS; i++) {
-        pos = f(pos);
-        if (dot(pos, pos) > radius_squared) {
-            results.iterations = float(i);
-            results.position = pos;
-            return results;
-        }
+/**
+ * Complex division:
+ *
+ * z / w = z * (1 / w)
+ */
+vec2 cdiv(vec2 z, vec2 w) {
+    return cmult(z, cinv(w));
+}
+
+/**
+ * Coefficients for f(z)
+ */
+uniform float numerator_coeffs[NUM_TERMS];
+uniform float denominator_coeffs[NUM_TERMS];
+
+/**
+ * Point in the complex plane
+ */
+uniform vec2 c;
+
+/**
+ * Compute the powers
+ * z^0, z^1, ... z^n and store them in a buffer
+ */
+void compute_powers(inout vec2[NUM_TERMS] powers, vec2 z) {
+    powers[0] = vec2(1.0, 0.0);
+    powers[1] = z;
+    for (int i = 2; i < NUM_TERMS; i++) {
+        powers[i] = cmult(z, powers[i - 1]);
     }
-    results.iterations = float(MAX_ITERATIONS);
-    results.position = pos;
-    return results; 
 }
 
+/**
+ * Compute
+ * 
+ *        az^8 + bz^7 + cz^6 + dz^5 + ez^4 + ez^3 + fz^2 + gz + h
+ * f(z) = ------------------------------------------------------- + C
+ *        iz^8 + jz^7 + kz^6 + lz^5 + mz^4 + nz^3 + oz^2 + pz + q
+ *
+ * Where C is the current position
+ */
 vec2 f(vec2 z) {
-    return 1.0001 * z;
+    vec2 powers[NUM_TERMS];
+    compute_powers(powers, z);
+
+    vec2 top_sum = vec2(0.0);
+    vec2 bottom_sum = vec2(0.0);
+    for (int i = 0; i < NUM_TERMS; i++) {
+        top_sum += numerator_coeffs[i] * powers[i];
+        bottom_sum += denominator_coeffs[i] * powers[i];
+    }
+
+    return cdiv(top_sum, bottom_sum) + c;
 }
 
 void main() {
     vec2 angles = to_angles(fUv);
     vec2 z = to_complex(angles);
 
-    EscapeTimeResults results = escape_time(z, 2.0);
+    EscapeTimeResults results = escape_time(z);
 
     //float circle = step(2.0, length(z));
-    gl_FragColor = vec4(results.iterations, 0.0, 0.0, 1.0);
+    gl_FragColor = vec4(results.iterations / float(MAX_ITERATIONS), 0.0, 0.0, 1.0);
 }

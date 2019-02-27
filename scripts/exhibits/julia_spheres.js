@@ -8,6 +8,7 @@ class JuliaSphereExhibit extends Exhibit {
     make_shader_requests() {
         return [
            ajax('shaders/uv_quad.vert'),
+           ajax('shaders/escape_time_sphere.frag'),
            ajax('shaders/julia_sphere.frag'),
         ];
     }
@@ -19,7 +20,11 @@ class JuliaSphereExhibit extends Exhibit {
     make_template_material(vert, frag) {
         return new THREE.ShaderMaterial({
             uniforms: {
-                c: {value: vec2(.285, .01)}
+                c: {value: vec2(.285, .01)},
+                escape_radius: {value: 2.0},
+                // z^2 + c 
+                numerator_coeffs: {value: [0, 0, 1, 0, 0, 0, 0, 0]},
+                denominator_coeffs: {value: [1, 0, 0, 0, 0, 0, 0, 0]}
             },
             name: 'julia_sphere',
             vertexShader: vert,
@@ -32,9 +37,10 @@ class JuliaSphereExhibit extends Exhibit {
     }
 
     make_materials(shader_text) {
-        let [vert, frag] = shader_text;
+        let [vert, header_frag, footer_frag] = shader_text;
 
-        let base_mat = this.make_template_material(vert, frag);
+        let base_mat = this.make_template_material(
+            vert, header_frag + '\n' + footer_frag);
 
         this.materials.set('julia', base_mat);
 
