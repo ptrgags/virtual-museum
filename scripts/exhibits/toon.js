@@ -321,7 +321,7 @@ class ToonExhibit extends Exhibit {
     }
 
     make_seashells() {
-        let shells = [];
+        this.shells = [];
         for (let [i, pos] of this.grid_coords.entries()) {
             let seashell = TOON_SHELLS[i];
             let mat_name = `toon-${seashell.name}`;
@@ -342,9 +342,9 @@ class ToonExhibit extends Exhibit {
             mesh.scale.y = scale;
             mesh.scale.z = scale;
 
-            shells.push(mesh);
+            this.shells.push(mesh);
         }
-        return shells;
+        return this.shells;
     }
 
     make_stands() {
@@ -498,5 +498,11 @@ class ToonExhibit extends Exhibit {
 
         for (let helper of this.colored_light_helpers)
             helper.update();
+
+        //TODO: Add custom animations
+        for (let shell of this.shells) {
+            shell.rotation.y -= 0.01;
+            shell.position.y += 0.01 * Math.sin(t - shell.position.x);
+        }
     }
 }
