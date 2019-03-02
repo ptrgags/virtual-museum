@@ -321,7 +321,7 @@ class ToonExhibit extends Exhibit {
     }
 
     make_seashells() {
-        let shells = [];
+        this.shells = [];
         for (let [i, pos] of this.grid_coords.entries()) {
             let seashell = TOON_SHELLS[i];
             let mat_name = `toon-${seashell.name}`;
@@ -342,9 +342,9 @@ class ToonExhibit extends Exhibit {
             mesh.scale.y = scale;
             mesh.scale.z = scale;
 
-            shells.push(mesh);
+            this.shells.push(mesh);
         }
-        return shells;
+        return this.shells;
     }
 
     make_stands() {
@@ -371,25 +371,138 @@ class ToonExhibit extends Exhibit {
         return seashells.concat(stands);
     }
 
+    make_spotlights() {
+        let lights = [];
+        let helpers = [];
+        /** Add four spotlights  on the ceiling, illuminating the models */
+        // Spotlight settings
+        const SPOTLIGHT_COLOR = 0xFFFFDD;
+        const SPOTLIGHT_INTENSITY = 0.3;
+        const SPOTLIGHT_DIST = 2.0 * this.ROOM_SIZE;
+        const SPOTLIGHT_RADIUS = 0.9 * this.ROOM_SIZE / 2.0; 
+        const SPOTLIGHT_ANGLE = Math.atan2(SPOTLIGHT_RADIUS, this.ROOM_SIZE);
+        const SPOTLIGHT_DECAY = 0.2;
+
+        // 2x2 grid of spotlights
+        const ROWS = 2;
+        const COLS = 2;
+        const ORIGIN = vec3(-0.5, 1, -0.5).multiplyScalar(this.ROOM_SIZE);
+        const DELTA = vec3(1, 0, 1).multiplyScalar(this.ROOM_SIZE);
+        for (let i = 0; i < ROWS; i++) {
+            for (let j = 0; j < COLS; j++) {
+                let coord = vec3(j, 0, i);
+                let pos = ORIGIN.clone();
+                pos.add(DELTA.clone().multiply(coord));
+
+                // Position the light on the ceiling
+                let light = new THREE.SpotLight(
+                    SPOTLIGHT_COLOR,
+                    SPOTLIGHT_INTENSITY,
+                    SPOTLIGHT_DIST,
+                    SPOTLIGHT_ANGLE,
+                    SPOTLIGHT_DECAY);
+                //light.castShadow = true;
+                light.position.copy(pos);
+                lights.push(light);
+
+                // Point the light straight down at the floor
+                light.target.position.copy(pos);
+                light.target.position.y = 0;
+                light.target.updateMatrixWorld();
+
+                // For debugging, show where the spotlight is
+                let helper = new THREE.SpotLightHelper(light);
+                helpers.push(helper);
+            }
+        }
+
+        return [lights, helpers];
+    }
+
+    make_colored_lights() {
+        this.x_lights = [];
+        this.colored_lights = [];
+        this.colored_light_helpers = [];
+
+        const LIGHT_HEIGHT = this.ROOM_SIZE / 4.0;
+        const LIGHT_INTENSITY = 0.3;
+        const LIGHT_DIST = this.ROOM_SIZE / 2.0;
+        const LIGHT_OFFSET = this.ROOM_SIZE / 2.0;
+        const HELPER_SIZE = 0.5;
+        for (let i = -1; i <= 1; i++) {
+            // Random light that moves in the x-direction
+            let x_color = Math.random() * 0x1000000;
+            let x_light = new THREE.PointLight(
+                x_color, LIGHT_INTENSITY, LIGHT_DIST);
+            x_light.position.set(0, LIGHT_HEIGHT, i * LIGHT_OFFSET);
+
+            // Add properties about the light's animation
+            x_light.animation = {
+                dir: 'x',
+                phase: Math.random() * 2.0 * Math.PI,
+            };
+
+            let x_helper = new THREE.PointLightHelper(x_light, HELPER_SIZE);
+
+            this.colored_lights.push(x_light);
+            this.colored_light_helpers.push(x_helper);
+
+            // Same thing but in the z direction
+            let z_color = Math.random() * 0x1000000;
+            let z_light = new THREE.PointLight(
+                z_color, LIGHT_INTENSITY, LIGHT_DIST);
+            z_light.position.set(i * LIGHT_OFFSET, LIGHT_HEIGHT, 0);
+
+            // Add properties about the light's animation
+            z_light.animation = {
+                dir: 'z',
+                phase: Math.random() * 2.0 * Math.PI,
+            };
+
+            let z_helper = new THREE.PointLightHelper(z_light, HELPER_SIZE);
+
+            this.colored_lights.push(z_light);
+            this.colored_light_helpers.push(z_helper);
+
+        }
+
+        return [this.colored_lights, this.colored_light_helpers];
+    }
+
     make_lights() {
         let lights = [];
         let helpers = [];
 
+        // Keep the default room lighting  so the room isn't too dark
         let default_lights = super.make_lights();
 
-        for (let [i, pos] of this.grid_coords.entries()) {
-            let color = Math.floor(Math.random() * 0x1000000);
-            let light = new THREE.PointLight(color, 0.1, 10.0);
-            light.position.copy(pos);
-            light.position.y = 0.45 * this.ROOM_SIZE;
-            lights.push(light);
+        let [spotlights, spotlight_helpers] = this.make_spotlights();
+        let [colored_lights, colored_light_helpers] = 
+            this.make_colored_lights(); 
 
-            let helper = new THREE.PointLightHelper(light);
-            helpers.push(helper);
-        }
-        return lights.concat(default_lights, helpers);
+        lights = lights.concat(spotlights, colored_lights);
+        helpers = helpers.concat(spotlight_helpers, colored_light_helpers);
+
+        return default_lights.concat(lights, colored_light_helpers);
     }
 
-    update() {
+    update(t) {
+        let FREQ = 0.3;
+        for (let light of this.colored_lights) {
+            let anim_params = light.animation;
+            let offset = 0.9 * this.ROOM_SIZE * Math.sin(
+                FREQ * t + anim_params.phase);
+            light.position[anim_params.dir] = offset;
+
+        }
+
+        for (let helper of this.colored_light_helpers)
+            helper.update();
+
+        //TODO: Add custom animations
+        for (let shell of this.shells) {
+            shell.rotation.y -= 0.01;
+            shell.position.y += 0.01 * Math.sin(t - shell.position.x);
+        }
     }
 }

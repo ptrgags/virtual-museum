@@ -271,13 +271,12 @@ class Exhibit {
         camera.reposition(offset, forward_angle);
     }
 
-    render(renderer, camera) {
-        this.update();
+    render(renderer, camera, t) {
+        this.update(t);
         renderer.render(this.scene, camera);
     }
 
-    update() {
+    update(t) {
         // called once a frame
     }
 }
-
