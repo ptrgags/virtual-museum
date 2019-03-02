@@ -372,20 +372,65 @@ class ToonExhibit extends Exhibit {
     }
 
     make_lights() {
+        /*
+        let default_lights = super.make_lights();
+        this.light = new THREE.SpotLight(0xFFFFFF, 1.0, 2.0 * this.ROOM_SIZE, Math.PI / 4.0);
+        this.light.position.set(this.ROOM_SIZE / 2.0, this.ROOM_SIZE, this.ROOM_SIZE / 2.0);
+
+        this.light.target.position.set(this.ROOM_SIZE / 2.0, 0.0, this.ROOM_SIZE / 2.0);
+        this.light.target.updateMatrixWorld();
+
+        this.helper = new THREE.SpotLightHelper(this.light);
+
+        return default_lights.concat([this.light, this.helper]);
+        */
+
         let lights = [];
         let helpers = [];
 
+        // Keep the default room lighting  so the room isn't too dark
         let default_lights = super.make_lights();
 
-        for (let [i, pos] of this.grid_coords.entries()) {
-            let color = Math.floor(Math.random() * 0x1000000);
-            let light = new THREE.PointLight(color, 0.1, 10.0);
-            light.position.copy(pos);
-            light.position.y = 0.45 * this.ROOM_SIZE;
-            lights.push(light);
+        /** Add four spotlights  on the ceiling, illuminating the models */
+        // Spotlight settings
+        const SPOTLIGHT_COLOR = 0xFFFFEE;
+        const SPOTLIGHT_INTENSITY = 1.0;
+        const SPOTLIGHT_DIST = 2.0 * this.ROOM_SIZE;
+        const SPOTLIGHT_RADIUS = 0.9 * this.ROOM_SIZE / 2.0; 
+        const SPOTLIGHT_ANGLE = Math.atan2(SPOTLIGHT_RADIUS, this.ROOM_SIZE);
+        const SPOTLIGHT_DECAY = 0.2;
 
-            let helper = new THREE.PointLightHelper(light);
-            helpers.push(helper);
+        // 2x2 grid of spotlights
+        const ROWS = 2;
+        const COLS = 2;
+        const ORIGIN = vec3(-0.5, 1, -0.5).multiplyScalar(this.ROOM_SIZE);
+        const DELTA = vec3(1, 0, 1).multiplyScalar(this.ROOM_SIZE);
+        for (let i = 0; i < ROWS; i++) {
+            for (let j = 0; j < COLS; j++) {
+                let coord = vec3(j, 0, i);
+                let pos = ORIGIN.clone();
+                pos.add(DELTA.clone().multiply(coord));
+
+                // Position the light on the ceiling
+                let light = new THREE.SpotLight(
+                    SPOTLIGHT_COLOR,
+                    SPOTLIGHT_INTENSITY,
+                    SPOTLIGHT_DIST,
+                    SPOTLIGHT_ANGLE,
+                    SPOTLIGHT_DECAY);
+                //light.castShadow = true;
+                light.position.copy(pos);
+                lights.push(light);
+
+                // Point the light straight down at the floor
+                light.target.position.copy(pos);
+                light.target.position.y = 0;
+                light.target.updateMatrixWorld();
+
+                // For debugging, show where the spotlight is
+                let helper = new THREE.SpotLightHelper(light);
+                helpers.push(helper);
+            }
         }
         return lights.concat(default_lights, helpers);
     }

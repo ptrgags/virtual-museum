@@ -20,6 +20,7 @@ window.onload = function() {
     let h = window.innerHeight;
     renderer = new THREE.WebGLRenderer({alpha: true});
     renderer.setSize(w, h);
+    //renderer.shadowMap.enabled = true;
     document.body.appendChild(renderer.domElement);
 
     document.addEventListener('keydown', (event) => museum.key_pressed(event));
