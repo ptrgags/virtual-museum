@@ -372,19 +372,6 @@ class ToonExhibit extends Exhibit {
     }
 
     make_lights() {
-        /*
-        let default_lights = super.make_lights();
-        this.light = new THREE.SpotLight(0xFFFFFF, 1.0, 2.0 * this.ROOM_SIZE, Math.PI / 4.0);
-        this.light.position.set(this.ROOM_SIZE / 2.0, this.ROOM_SIZE, this.ROOM_SIZE / 2.0);
-
-        this.light.target.position.set(this.ROOM_SIZE / 2.0, 0.0, this.ROOM_SIZE / 2.0);
-        this.light.target.updateMatrixWorld();
-
-        this.helper = new THREE.SpotLightHelper(this.light);
-
-        return default_lights.concat([this.light, this.helper]);
-        */
-
         let lights = [];
         let helpers = [];
 
@@ -393,8 +380,8 @@ class ToonExhibit extends Exhibit {
 
         /** Add four spotlights  on the ceiling, illuminating the models */
         // Spotlight settings
-        const SPOTLIGHT_COLOR = 0xFFFFEE;
-        const SPOTLIGHT_INTENSITY = 1.0;
+        const SPOTLIGHT_COLOR = 0xFFFFDD;
+        const SPOTLIGHT_INTENSITY = 0.35;
         const SPOTLIGHT_DIST = 2.0 * this.ROOM_SIZE;
         const SPOTLIGHT_RADIUS = 0.9 * this.ROOM_SIZE / 2.0; 
         const SPOTLIGHT_ANGLE = Math.atan2(SPOTLIGHT_RADIUS, this.ROOM_SIZE);
