@@ -428,6 +428,7 @@ class ToonExhibit extends Exhibit {
         const LIGHT_INTENSITY = 0.3;
         const LIGHT_DIST = this.ROOM_SIZE / 2.0;
         const LIGHT_OFFSET = this.ROOM_SIZE / 2.0;
+        const HELPER_SIZE = 0.5;
         for (let i = -1; i <= 1; i++) {
             // Random light that moves in the x-direction
             let x_color = Math.random() * 0x1000000;
@@ -441,7 +442,7 @@ class ToonExhibit extends Exhibit {
                 phase: Math.random() * 2.0 * Math.PI,
             };
 
-            let x_helper = new THREE.PointLightHelper(x_light);
+            let x_helper = new THREE.PointLightHelper(x_light, HELPER_SIZE);
 
             this.colored_lights.push(x_light);
             this.colored_light_helpers.push(x_helper);
@@ -458,7 +459,7 @@ class ToonExhibit extends Exhibit {
                 phase: Math.random() * 2.0 * Math.PI,
             };
 
-            let z_helper = new THREE.PointLightHelper(z_light);
+            let z_helper = new THREE.PointLightHelper(z_light, HELPER_SIZE);
 
             this.colored_lights.push(z_light);
             this.colored_light_helpers.push(z_helper);
@@ -482,7 +483,7 @@ class ToonExhibit extends Exhibit {
         lights = lights.concat(spotlights, colored_lights);
         helpers = helpers.concat(spotlight_helpers, colored_light_helpers);
 
-        return default_lights.concat(lights, helpers);
+        return default_lights.concat(lights, colored_light_helpers);
     }
 
     update(t) {
