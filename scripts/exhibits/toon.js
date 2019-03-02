@@ -371,17 +371,13 @@ class ToonExhibit extends Exhibit {
         return seashells.concat(stands);
     }
 
-    make_lights() {
+    make_spotlights() {
         let lights = [];
         let helpers = [];
-
-        // Keep the default room lighting  so the room isn't too dark
-        let default_lights = super.make_lights();
-
         /** Add four spotlights  on the ceiling, illuminating the models */
         // Spotlight settings
         const SPOTLIGHT_COLOR = 0xFFFFDD;
-        const SPOTLIGHT_INTENSITY = 0.35;
+        const SPOTLIGHT_INTENSITY = 0.3;
         const SPOTLIGHT_DIST = 2.0 * this.ROOM_SIZE;
         const SPOTLIGHT_RADIUS = 0.9 * this.ROOM_SIZE / 2.0; 
         const SPOTLIGHT_ANGLE = Math.atan2(SPOTLIGHT_RADIUS, this.ROOM_SIZE);
@@ -419,9 +415,87 @@ class ToonExhibit extends Exhibit {
                 helpers.push(helper);
             }
         }
-        return lights.concat(default_lights, helpers);
+
+        return [lights, helpers];
     }
 
-    update() {
+    make_colored_lights() {
+        this.x_lights = [];
+        this.colored_lights = [];
+        this.colored_light_helpers = [];
+
+        const LIGHT_HEIGHT = this.ROOM_SIZE / 4.0;
+        const LIGHT_INTENSITY = 0.3;
+        const LIGHT_DIST = this.ROOM_SIZE / 2.0;
+        const LIGHT_OFFSET = this.ROOM_SIZE / 2.0;
+        for (let i = -1; i <= 1; i++) {
+            // Random light that moves in the x-direction
+            let x_color = Math.random() * 0x1000000;
+            let x_light = new THREE.PointLight(
+                x_color, LIGHT_INTENSITY, LIGHT_DIST);
+            x_light.position.set(0, LIGHT_HEIGHT, i * LIGHT_OFFSET);
+
+            // Add properties about the light's animation
+            x_light.animation = {
+                dir: 'x',
+                phase: Math.random() * 2.0 * Math.PI,
+            };
+
+            let x_helper = new THREE.PointLightHelper(x_light);
+
+            this.colored_lights.push(x_light);
+            this.colored_light_helpers.push(x_helper);
+
+            // Same thing but in the z direction
+            let z_color = Math.random() * 0x1000000;
+            let z_light = new THREE.PointLight(
+                z_color, LIGHT_INTENSITY, LIGHT_DIST);
+            z_light.position.set(i * LIGHT_OFFSET, LIGHT_HEIGHT, 0);
+
+            // Add properties about the light's animation
+            z_light.animation = {
+                dir: 'z',
+                phase: Math.random() * 2.0 * Math.PI,
+            };
+
+            let z_helper = new THREE.PointLightHelper(z_light);
+
+            this.colored_lights.push(z_light);
+            this.colored_light_helpers.push(z_helper);
+
+        }
+
+        return [this.colored_lights, this.colored_light_helpers];
+    }
+
+    make_lights() {
+        let lights = [];
+        let helpers = [];
+
+        // Keep the default room lighting  so the room isn't too dark
+        let default_lights = super.make_lights();
+
+        let [spotlights, spotlight_helpers] = this.make_spotlights();
+        let [colored_lights, colored_light_helpers] = 
+            this.make_colored_lights(); 
+
+        lights = lights.concat(spotlights, colored_lights);
+        helpers = helpers.concat(spotlight_helpers, colored_light_helpers);
+
+        return default_lights.concat(lights, helpers);
+    }
+
+    update(t) {
+        let FREQ = 0.3;
+        for (let light of this.colored_lights) {
+            let anim_params = light.animation;
+            let offset = 0.9 * this.ROOM_SIZE * Math.sin(
+                FREQ * t + anim_params.phase);
+            light.position[anim_params.dir] = offset;
+
+        }
+
+        for (let helper of this.colored_light_helpers)
+            helper.update();
     }
 }

@@ -271,12 +271,12 @@ class Exhibit {
         camera.reposition(offset, forward_angle);
     }
 
-    render(renderer, camera) {
-        this.update();
+    render(renderer, camera, t) {
+        this.update(t);
         renderer.render(this.scene, camera);
     }
 
-    update() {
+    update(t) {
         // called once a frame
     }
 }
@@ -338,11 +338,11 @@ class RaymarchExhibit extends Exhibit {
         return this.materials.get('raymarch').uniforms;
     }
 
-    update() {
+    update(t) {
         if (this.is_loading)
             return;
 
         this.uniforms.eye.value = this.eye;
-        this.uniforms.time.value = (performance.now() - this.start_time) / 1000.0;
+        this.uniforms.time.value = t;
     }
 }

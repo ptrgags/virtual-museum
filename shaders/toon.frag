@@ -34,13 +34,24 @@ void main() {
 
     // Ignore the default lights, they tend to wash out the colors
     const int FIRST_LIGHT = 8;
+    const float BIAS = 0.1;
+    const float DIST_BLUR = 0.2;
 
     // Lambert shading for point lights
     for (int i = FIRST_LIGHT; i < NUM_POINT_LIGHTS; i++) {
-        vec3 L = normalize(pointLights[i].position - fPositionView);
+        vec3 diff = pointLights[i].position - fPositionView;
+        float dist = length(diff);
+        vec3 L = normalize(diff);
 
-        vec3 lambert = pointLights[i].color * max(dot(L, N), 0.0);
-        color += lambert;
+        vec3 brightened = pointLights[i].color + BIAS;
+
+        vec3 lambert = brightened * max(dot(L, N), 0.0);
+
+        float cutoff_dist = pointLights[i].distance;
+        float dist_mask = smoothstep(
+            cutoff_dist + DIST_BLUR, cutoff_dist, dist);
+
+        color += dist_mask * lambert;
     }
 
     // Lambert shading with spot lights
@@ -61,8 +72,6 @@ void main() {
     // TODO: Make these into parameters
     const float NUM_BUCKETS = 4.0;
     vec3 toon = floor(color * NUM_BUCKETS) / NUM_BUCKETS;
-
-
 
     // Compute the silhouette for later
     const float SILHOUETTE_AMOUNT = 0.3;

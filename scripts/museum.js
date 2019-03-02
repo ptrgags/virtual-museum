@@ -126,11 +126,11 @@ class Museum {
         }
     }
 
-    render(renderer) {
+    render(renderer, t) {
         let exhibit = this.current_exhibit;
 
         if (!exhibit.is_loading) {
-            exhibit.render(renderer, this.camera.camera);
+            exhibit.render(renderer, this.camera.camera, t);
         }
     }
 
