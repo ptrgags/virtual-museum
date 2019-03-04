@@ -31,6 +31,12 @@ vec3 repeat_domain(vec3 pos, float modulo) {
     return mod(pos + 0.5 * modulo, modulo) - modulo * 0.5;
 }
 
+// like repeat_domain, but only in the x and z directions
+vec3 repeat_xz(vec3 pos, float modulo) {
+    vec2 grid = mod(pos.xz + 0.5 * modulo, modulo) - modulo * 0.5; 
+    return vec3(grid.x, pos.y, grid.y);
+}
+
 // Distance to the sphere
 float sdf_sphere(vec3 pos, float radius) {
     return length(pos) - radius;
@@ -42,6 +48,16 @@ float sdf_sphere(vec3 pos, float radius) {
 float sdf_cylinder(vec3 pos, float radius) {
     float s = length(pos.xz);
     return s - radius;
+}
+
+float sdf_cube(vec3 pos, float radius) { 
+    // Mirror across all axes
+    vec3 quadrant1 = abs(pos);
+
+    return length(max(quadrant1 - radius, 0.0));
+    
+    //float max_coord = max(pos.x, max(pos.y, pos.z));
+    //return max_coord - radius;
 }
 
 // Signed distance function represents the distance
