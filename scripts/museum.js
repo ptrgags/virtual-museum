@@ -38,9 +38,9 @@ class Museum {
         let exhibits = [
             [[4, 5], new JuliaSphereExhibit(this)],
             [[3, 4], new ToonExhibit()],
-            [[4, 4], new RaymarchExhibit(
-                'west', 'shaders/raymarch_infinite.frag', this)],
-            [[4, 6], new Exhibit()],
+            [[4, 4], new Exhibit()],
+            [[4, 6], new RaymarchExhibit(
+                'east', 'shaders/sphere_lattice.frag', this)],
             [[3, 6], new Exhibit()],
             [[2, 6], new Exhibit()],
         ];

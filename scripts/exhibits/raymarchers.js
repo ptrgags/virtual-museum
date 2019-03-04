@@ -19,6 +19,7 @@ class RaymarchExhibit extends Exhibit {
     make_shader_requests() {
         return [
             ajax('shaders/uv_quad.vert'),
+            ajax('shaders/raymarch_infinite.frag'),
             ajax(this.shader_url),
         ];
     };
@@ -38,7 +39,10 @@ class RaymarchExhibit extends Exhibit {
     }
 
     make_materials(shader_text) {
-        let [uv_vert, raymarch_frag] = shader_text;
+        let [uv_vert, raymarch_header, raymarch_frag] = shader_text;
+        let frag_shader = raymarch_header + '\n' + raymarch_frag;
+
+
         let raymarch_mat = new THREE.ShaderMaterial({
             uniforms: THREE.UniformsUtils.merge([
                 THREE.UniformsLib['lights'],
@@ -49,7 +53,7 @@ class RaymarchExhibit extends Exhibit {
                 }
             ]),
             vertexShader: uv_vert,
-            fragmentShader: raymarch_frag,
+            fragmentShader: frag_shader,
             lights: true,
         });
         this.materials.set('raymarch', raymarch_mat);

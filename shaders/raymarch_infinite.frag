@@ -3,37 +3,28 @@
 #define ASPECT_RATIO 2.0
 #define FOUR_PI 12.56637
 
-mat3 rotate_y(float theta) {
-    float c = cos(theta);
-    float s = sin(theta);
-    return mat3(
-        c, 0, -s,
-        0, 1, 0,
-        s, 0, c);
-}
 
-mat3 rotate_z(float theta) {
-    float c = cos(theta);
-    float s = sin(theta);
-    return mat3(
-        c, s, 0,
-        -s, 0, 0,
-        0, 0,  1);
-}
+// Uniforms ==================================================
 
-// Capture information about the rendered scene
-struct RaymarchResults {
-    float iters;
-    float depth;
-    vec3 pos;
-    vec3 color;
-};
-
+// Time for animation
 uniform float time;
+
+// Position of the eye relative to the center of the room (normalized so
+// the room height is 1
 uniform vec3 eye;
+
+// Angle that measures how much the room is rotated from the standard
+// definition where the raymarch wall is facing north
 uniform float room_angle;
 
 varying vec2 fUv;
+
+// Signed Distance Field Geometry ====================================
+
+// CSG Operations
+#define sdf_union min
+#define sdf_intersecion max
+#define sdf_sub(a, b) max((a), -(b))
 
 // use mod() to repeat the scene forever in all three directions.
 vec3 repeat_domain(vec3 pos, float modulo) {
@@ -53,27 +44,31 @@ float sdf_cylinder(vec3 pos, float radius) {
     return s - radius;
 }
 
-#define sdf_union min
-#define sdf_intersecion max
-#define sdf_sub(a, b) max((a), -(b))
-
 // Signed distance function represents the distance
 // to the nearest surface in the scene
 // + means outside, - means inside
-float sdf(vec3 pos) {
-    vec3 cells = repeat_domain(pos, 2.0);
-    float sphere = sdf_sphere(cells, 0.5);
+//
+// The actual scene's signed distance function will be defined in the
+// footer of this shader
+float sdf(vec3 pos);
 
-    // Make an infininite lattice of cylinders 
-    const float GRID_THICKNESS = 0.06;
-    vec3 cells2 = repeat_domain(pos, 0.25);
-    float cyl_y = sdf_cylinder(cells2, GRID_THICKNESS);
-    float cyl_z = sdf_cylinder(cells2.yzx, GRID_THICKNESS);
-    float cyl_x = sdf_cylinder(cells2.zxy, GRID_THICKNESS);
-    float cylinders = sdf_union(cyl_y, cyl_z);
-    cylinders = sdf_union(cylinders, cyl_x);
 
-    return sdf_sub(sphere, cylinders);
+mat3 rotate_y(float theta) {
+    float c = cos(theta);
+    float s = sin(theta);
+    return mat3(
+        c, 0, -s,
+        0, 1, 0,
+        s, 0, c);
+}
+
+mat3 rotate_z(float theta) {
+    float c = cos(theta);
+    float s = sin(theta);
+    return mat3(
+        c, s, 0,
+        -s, 0, 0,
+        0, 0,  1);
 }
 
 /**
@@ -99,6 +94,9 @@ float haversin(float x) {
     return 0.5 - 0.5 * cos(x);
 }
 
+/**
+ * Pick a color for each cell
+ */
 vec3 cell_color(vec3 pos) {
     vec3 coords = floor(pos - 0.5);
     float r = haversin(coords.x * 30.0 - 0.5 * time);
@@ -107,7 +105,16 @@ vec3 cell_color(vec3 pos) {
     return vec3(r, g, b);
 }
 
-    
+// ===================================================================
+
+// Capture information about the rendered scene
+struct RaymarchResults {
+    float iters;
+    float depth;
+    vec3 pos;
+    vec3 color;
+};
+ 
 // Perform raymarching.
 RaymarchResults raymarch(vec3 eye, vec3 direction) {
     float t = 0.0;
@@ -231,26 +238,6 @@ vec3 wall_coord() {
     return vec3(x, y, z);
 }
 
-
-void main() {
-    // Standardize the wall and eye position so the wall with the screen
-    // is considered the -z direction
-    vec3 standard_wall = wall_coord();
-    vec3 standard_eye = rotate_y(-room_angle) * eye;
-
-    // Direction from eye to the wall coordinate
-    vec3 direction = normalize(standard_wall - standard_eye);
-
-    // Move through the field of spheres
-    vec3 aisle_offset = vec3(0.0, -0.25, 0.0);
-    vec3 movement = time * vec3(0.0, 0.0, -1.0);
-    vec3 box_pos = aisle_offset + movement;
-    RaymarchResults results = raymarch(box_pos + standard_eye, direction);
-
-    // Apply diffuse lighting and fog
-    vec3 shaded = lambert_shading(results.pos, box_pos, results.color);
-    vec3 foggy = fog(shaded, results.depth, 0.05);
-   
-    // Output to screen
-    gl_FragColor = vec4(foggy, 1.0); 
+vec3 standardize_eye() {
+    return rotate_y(-room_angle) * eye;
 }
