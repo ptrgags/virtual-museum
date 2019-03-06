@@ -156,10 +156,11 @@ class Exhibit {
             }
         }
 
-        let ambient = new THREE.AmbientLight(0xAAEEFF, 0.5);
+        let ambient = new THREE.AmbientLight(0xFFFFFF, 0.5);
         lights.push(ambient);
 
-        return lights.concat(helpers);
+        //return lights.concat(helpers);
+        return lights;
     }
 
     make_floor() {
