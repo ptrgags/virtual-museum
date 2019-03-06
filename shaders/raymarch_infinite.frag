@@ -1,3 +1,4 @@
+precision highp float;
 #define MAX_ITERATIONS 500.0
 #define EPSILON 0.0001
 #define ASPECT_RATIO 2.0
@@ -199,7 +200,7 @@ float is_visible(vec3 pos, vec3 light_dir) {
 /**
  * Apply simple lambert shading to a point in the scene
  */
-vec3 lambert_shading(vec3 pos, vec3 box_pos, vec3 surface_color) {
+vec3 lambert_shading(vec3 pos, vec3 box_pos, vec3 surface_color, float scale) {
     vec3 N = get_normal(pos);
 
     // lights are specified relative to the current box position
@@ -218,8 +219,8 @@ vec3 lambert_shading(vec3 pos, vec3 box_pos, vec3 surface_color) {
     // Lambert shading
     vec3 color = 0.1 * surface_color;
     for (int i = 0; i < NUM_LIGHTS; i++) {
-        vec3 light_dir = box_pos + LIGHTS[i] - pos;
-        vec3 L = normalize(box_pos + LIGHTS[i] - pos);
+        vec3 light_dir = box_pos + scale * LIGHTS[i] - pos;
+        vec3 L = normalize(light_dir);
         float dist_sqr = dot(light_dir, light_dir);
 
         //float visibility = is_visible(pos, light_dir); 
