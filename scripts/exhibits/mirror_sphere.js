@@ -74,6 +74,16 @@ class MirrorSphereExhibit extends Exhibit {
         this.scene.add(reflective_obj);
     }
 
+    make_main_objs() {
+        let geom = new THREE.CubeGeometry(2, 1, 1);
+        let material = this.materials.get('door');
+        let mesh = new THREE.Mesh(geom, material);
+        mesh.position.set(1, 1, 1);
+        mesh.rotation.x = 10.0;
+        mesh.rotation.y = 30.0;
+        return [mesh];
+    }
+
     make_mirrored_obj() {
         let geom = new THREE.SphereGeometry(this.ROOM_SIZE / 4.0, 50, 50);
         let material = this.materials.get('mirror');
