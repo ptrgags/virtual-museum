@@ -30,6 +30,23 @@ class JuliaSphereExhibit extends Exhibit {
                 // z^2 + c 
                 numerator_coeffs: {value: [0, 0, 1, 0]},
                 //denominator_coeffs: {value: [0, 0, 1.5, 0]}
+
+                // I picked the parameters for the cosine color palettes
+                // using this handy online editor by Karsten Schmidt:
+                // http://dev.thi.ng/gradients/
+                // https://github.com/thi-ng/color
+                outside_palette: {value: {
+                    bias: vec3(0.5, 0.5, 0.5),
+                    amp: vec3(0.5, 0.5, 0.5),
+                    freq: vec3(2.0, 1.0, 1.0),
+                    phase: vec3(0, 0.1, 0.4),
+                }},
+                inside_palette: {value: {
+                    bias: vec3(0.5, 0.5, 0.0),
+                    amp: vec3(0.5, 0.2, 0.0),
+                    freq: vec3(1.0, 1.0, 0.0),
+                    phase: vec3(0, 0.1, 0.0),
+                }}, 
             },
             name: 'julia_sphere',
             vertexShader: vert,

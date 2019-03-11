@@ -2,6 +2,36 @@
 #define NUM_TERMS (MAX_DEGREE + 1)
 
 /**
+ * Coefficients for f(z)
+ */
+uniform float numerator_coeffs[NUM_TERMS];
+
+/**
+ * Point in the complex plane
+ */
+uniform vec2 c;
+
+/**
+ * Cosine Color Palettes, based on Inigo Quilez's article
+ *
+ * https://iquilezles.org/www/articles/palettes/palettes.htm
+ */
+struct CosinePalette {
+    vec3 bias;
+    vec3 amp;
+    vec3 freq;
+    vec3 phase;
+};
+
+uniform CosinePalette outside_palette;
+uniform CosinePalette inside_palette;
+
+vec3 cos_palette(CosinePalette pal, float t) {
+    vec3 arg = 2.0 * PI * (pal.freq * t + pal.phase);
+    return pal.bias + pal.amp * cos(arg); 
+}
+
+/**
  * Complex conjugation:
  * (a + bi)* = (a - bi)
  */
@@ -42,16 +72,6 @@ vec2 cdiv(vec2 z, vec2 w) {
     return cmult(z, cinv(w));
 }
 
-/**
- * Coefficients for f(z)
- */
-uniform float numerator_coeffs[NUM_TERMS];
-uniform float denominator_coeffs[NUM_TERMS];
-
-/**
- * Point in the complex plane
- */
-uniform vec2 c;
 
 /**
  * Compute the powers
@@ -105,14 +125,14 @@ void main() {
     float angle = atan(results.position.y, results.position.x); 
     float angle_norm = fract(angle / PI);
 
-    vec3 outside_color = iter_mask * vec3(angle_norm, 0.0, 0.0);
+    vec3 outside_color = iter_mask * cos_palette(outside_palette, angle_norm);
 
     // Coloring 3: Odd/even max radius
-    float max_r_mask = 0.5 + 0.5 * mod(results.max_dist_sqr, 2.0);
+    float max_r_mask = 0.5 + 0.5 * mod(10.0 * results.max_dist_sqr, 2.0);
 
     // Coloring 4: Polyline Distance
     float dist = fract(results.poly_dist);
-    vec3 inside_color = iter_mask * vec3(0.0, dist, 0.0);
+    vec3 inside_color = cos_palette(inside_palette, dist);
 
     vec3 color = mix(inside_color, outside_color, results.escaped);
 
