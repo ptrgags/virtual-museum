@@ -1,7 +1,7 @@
 class FirstPersonCamera {
     constructor() {
         this.ASPECT = window.innerWidth / window.innerHeight;
-        this.FOV = 45;
+        this.FOV = 60;
         this.NEAR = 0.1;
         this.FAR = 100;
         this.camera = new THREE.PerspectiveCamera(

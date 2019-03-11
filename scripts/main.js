@@ -6,6 +6,8 @@ var pointer_locked = false;
 var compass;
 var minimap;
 
+var start_time;
+
 window.onload = function() {
     museum = new Museum();
     museum.load();
@@ -20,12 +22,15 @@ window.onload = function() {
     let h = window.innerHeight;
     renderer = new THREE.WebGLRenderer({alpha: true});
     renderer.setSize(w, h);
+    //renderer.shadowMap.enabled = true;
     document.body.appendChild(renderer.domElement);
 
     document.addEventListener('keydown', (event) => museum.key_pressed(event));
 
     //set up the mouse
     renderer.domElement.onclick = init_mouse;
+
+    start_time = performance.now();
 
     animate();
 }
@@ -45,9 +50,12 @@ let mouse_move = function(event) {
 let animate = function() {
     requestAnimationFrame(animate);
 
+    let time_now = performance.now();
+    let elapsed_time_sec = (time_now - start_time) / 1000.0;
+
     // Render the main view
     museum.update();
-    museum.render(renderer);
+    museum.render(renderer, elapsed_time_sec);
  
     // Determine where the HUD elements go given the current screen size 
     const COMPASS_DIMS = new THREE.Vector3(100, 100);
