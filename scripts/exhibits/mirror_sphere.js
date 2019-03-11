@@ -144,6 +144,12 @@ class MirrorSphereExhibit extends Exhibit {
         return mesh;
     }
 
+    // The player gets stuck when the cubes tilt too low. So let's just
+    // disable collisions except with the walls.
+    get obj_bboxes() {
+        return [];
+    }
+
     render(renderer, camera, t) {
         this.update(t);
         this.mirror_cam.update(renderer, this.mirror_scene);
