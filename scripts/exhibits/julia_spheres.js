@@ -47,7 +47,6 @@ class JuliaSphereExhibit extends Exhibit {
 
         let base_mat = this.make_template_material(
             vert, header_frag + '\n' + footer_frag);
-        base_mat.transparent = true;
 
         this.materials.set('julia', base_mat);
 
@@ -85,7 +84,7 @@ class JuliaSphereExhibit extends Exhibit {
 
     make_coeffs(phase_offset) {
         let time_sec = performance.now() / 1000.0;
-        let NUM_COEFFS = 5;
+        let NUM_COEFFS = 4;
         let buf = [];
         for (let i = 0; i < NUM_COEFFS; i++) { 
             let freq = 0.17 * i;
@@ -95,19 +94,12 @@ class JuliaSphereExhibit extends Exhibit {
         return buf;
     }
 
-
     update() {
         let time = performance.now() / 1000.0;
         let freq = 0.1;
         let uniforms = this.materials.get('julia').uniforms;
 
-        
-
-
-        //uniforms.numerator_coeffs.value[2] = 0.95 + 0.05 * haversin(freq * time);
-        //uniforms.numerator_coeffs.value[3] = 0.01 * haversin(2.0 * freq * time);
-        uniforms.numerator_coeffs.value = this.make_coeffs(0.0);
-        //uniforms.denominator_coeffs.value = this.make_coeffs(0.5);
+        uniforms.numerator_coeffs.value = this.make_coeffs(0.1);
 
         uniforms.c.value = this.complex_point;
     }
