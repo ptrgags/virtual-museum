@@ -53,6 +53,7 @@ void main() {
 
     // Direction from eye to the wall coordinate
     vec3 direction = normalize(standard_wall - standard_eye);
+    direction = rotate_y(0.1 * time) * direction;
 
     // Move through the field of spheres
     vec3 aisle_offset = vec3(0.0, 0.5, 1.0);
