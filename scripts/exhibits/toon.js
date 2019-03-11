@@ -15,7 +15,8 @@ let TOON_SHELLS = [
             cross_section_twist: vec2(0, 0),
             cross_section_m: vec2(8, 8),
             cross_section_n: vec2(8, 8),
-        }
+        },
+        rotate_x: true,
     },
     {
         name: 'diamond-circle-helix',
@@ -45,7 +46,8 @@ let TOON_SHELLS = [
             cross_section_twist: vec2(0, 0),
             cross_section_m: vec2(2, 2),
             cross_section_n: vec2(2, 2),
-        }
+        },
+        rotate_x: true,
     }, 
     {
         name: 'archimedian-spiral',
@@ -60,7 +62,8 @@ let TOON_SHELLS = [
             cross_section_twist: vec2(0, 0),
             cross_section_m: vec2(2, 2),
             cross_section_n: vec2(2, 2),
-        }
+        },
+        rotate_x: true
     },
     {
         name: 'cone-shell',
@@ -75,7 +78,7 @@ let TOON_SHELLS = [
             cross_section_twist: vec2(0, 0),
             cross_section_m: vec2(2, 2),
             cross_section_n: vec2(2, 2),
-        }
+        },
     },
     {
         name: 'star-coil',
@@ -240,7 +243,8 @@ let TOON_SHELLS = [
             cross_section_twist: vec2(0, 2 * Math.PI),
             cross_section_m: vec2(1, 1),
             cross_section_n: vec2(1, 1),
-        }
+        },
+        rotate_x: true
     }
 ];
 
@@ -341,6 +345,10 @@ class ToonExhibit extends Exhibit {
             mesh.scale.x = scale;
             mesh.scale.y = scale;
             mesh.scale.z = scale;
+
+            if (seashell.rotate_x) {
+                mesh.rotation.x = Math.PI / 2.0;
+            }
 
             this.shells.push(mesh);
         }
