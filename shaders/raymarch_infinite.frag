@@ -223,7 +223,6 @@ vec3 lambert_shading(
     LIGHTS[4] = vec3(0.0, 0.0, -1.0);
     LIGHTS[5] = vec3(0.0, 1.0, -1.0);
 
-    const float LIGHT_INTENSITY = 0.3;
     const vec3 AMBIENT_LIGHT = vec3(0.3);
 
     // Lambert shading

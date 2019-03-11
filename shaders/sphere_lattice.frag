@@ -34,7 +34,10 @@ void main() {
     RaymarchResults results = raymarch(box_pos + standard_eye, direction);
 
     // Apply diffuse lighting and fog
-    vec3 shaded = lambert_shading(results.pos, box_pos, results.color);
+    const float ROOM_SCALE = 1.0;
+    const float LIGHT_INTENSITY = 0.3;
+    vec3 shaded = lambert_shading(
+        results.pos, box_pos, results.color, ROOM_SCALE, LIGHT_INTENSITY);
     vec3 foggy = fog(shaded, results.depth, 0.05);
    
     // Output to screen
