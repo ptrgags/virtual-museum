@@ -28,8 +28,25 @@ class JuliaSphereExhibit extends Exhibit {
                 c: {value: vec2(.285, .01)},
                 escape_radius: {value: 2.0},
                 // z^2 + c 
-                numerator_coeffs: {value: [0, 0, 1, 0, 0]},
-                denominator_coeffs: {value: [0, 0, 1.5, 0, 0]}
+                numerator_coeffs: {value: [0, 0, 1, 0]},
+                //denominator_coeffs: {value: [0, 0, 1.5, 0]}
+
+                // I picked the parameters for the cosine color palettes
+                // using this handy online editor by Karsten Schmidt:
+                // http://dev.thi.ng/gradients/
+                // https://github.com/thi-ng/color
+                outside_palette: {value: {
+                    bias: vec3(0.5, 0.5, 0.5),
+                    amp: vec3(0.5, 0.5, 0.5),
+                    freq: vec3(2.0, 1.0, 1.0),
+                    phase: vec3(0, 0.1, 0.4),
+                }},
+                inside_palette: {value: {
+                    bias: vec3(0.5, 0.5, 0.0),
+                    amp: vec3(0.5, 0.2, 0.0),
+                    freq: vec3(1.0, 1.0, 0.0),
+                    phase: vec3(0, 0.1, 0.0),
+                }}, 
             },
             name: 'julia_sphere',
             vertexShader: vert,
@@ -47,19 +64,8 @@ class JuliaSphereExhibit extends Exhibit {
 
         let base_mat = this.make_template_material(
             vert, header_frag + '\n' + footer_frag);
-        base_mat.transparent = true;
 
         this.materials.set('julia', base_mat);
-
-        /**
-            TODO: Something like this but with 4 spheres
-        for (let seashell of TOON_SHELLS) {
-            let mat_name = `toon-${seashell.name}`;
-            let mat = seashell_mat.clone();
-            mat.uniforms.seashell_params.value = seashell.seashell_params;
-            this.materials.set(mat_name, mat);
-        }
-        */
     }
 
     make_main_objs() {
@@ -71,6 +77,7 @@ class JuliaSphereExhibit extends Exhibit {
         sphere.position.y = 0.5 * this.ROOM_SIZE;
         sphere.scale.multiplyScalar(5.0);
 
+        this.sphere = sphere;
 
         return [sphere];
     }
@@ -83,31 +90,25 @@ class JuliaSphereExhibit extends Exhibit {
         return vec2(eye.x, -eye.z);
     }
 
-    make_coeffs(phase_offset) {
-        let time_sec = performance.now() / 1000.0;
-        let NUM_COEFFS = 5;
+    make_coeffs(t, phase_offset) {
+        let NUM_COEFFS = 4;
         let buf = [];
         for (let i = 0; i < NUM_COEFFS; i++) { 
             let freq = 0.17 * i;
-            let val = haversin(freq * time_sec + phase_offset);
+            let val = haversin(freq * t + phase_offset);
             buf.push(val);
         }
         return buf;
     }
 
-
-    update() {
-        let time = performance.now() / 1000.0;
+    update(t) {
         let freq = 0.1;
         let uniforms = this.materials.get('julia').uniforms;
 
-        
+        uniforms.numerator_coeffs.value = this.make_coeffs(t, 0.0);
 
-
-        //uniforms.numerator_coeffs.value[2] = 0.95 + 0.05 * haversin(freq * time);
-        //uniforms.numerator_coeffs.value[3] = 0.01 * haversin(2.0 * freq * time);
-        uniforms.numerator_coeffs.value = this.make_coeffs(0.0);
-        //uniforms.denominator_coeffs.value = this.make_coeffs(0.5);
+        const ROTATION_RATE = 0.25;
+        this.sphere.rotation.y = ROTATION_RATE * t;
 
         uniforms.c.value = this.complex_point;
     }

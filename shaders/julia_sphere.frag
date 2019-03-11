@@ -1,16 +1,35 @@
-/**
- * Julia Set Sphere PARTIAL fragment shader
- *
- * This is an escape time rendering of a Julia set that allows for rational
- * complex functions with degrees up to 4 in both numerator and denominator:
- *
- *        az^8 + bz^7 + cz^6 + dz^5 + ez^4 + ez^3 + fz^2 + gz + h
- * f(z) = -------------------------------------------------------
- *        iz^8 + jz^7 + kz^6 + lz^5 + mz^4 + nz^3 + oz^2 + pz + q
- */
-
-#define MAX_DEGREE 4
+#define MAX_DEGREE 3
 #define NUM_TERMS (MAX_DEGREE + 1)
+
+/**
+ * Coefficients for f(z)
+ */
+uniform float numerator_coeffs[NUM_TERMS];
+
+/**
+ * Point in the complex plane
+ */
+uniform vec2 c;
+
+/**
+ * Cosine Color Palettes, based on Inigo Quilez's article
+ *
+ * https://iquilezles.org/www/articles/palettes/palettes.htm
+ */
+struct CosinePalette {
+    vec3 bias;
+    vec3 amp;
+    vec3 freq;
+    vec3 phase;
+};
+
+uniform CosinePalette outside_palette;
+uniform CosinePalette inside_palette;
+
+vec3 cos_palette(CosinePalette pal, float t) {
+    vec3 arg = 2.0 * PI * (pal.freq * t + pal.phase);
+    return pal.bias + pal.amp * cos(arg); 
+}
 
 /**
  * Complex conjugation:
@@ -53,16 +72,6 @@ vec2 cdiv(vec2 z, vec2 w) {
     return cmult(z, cinv(w));
 }
 
-/**
- * Coefficients for f(z)
- */
-uniform float numerator_coeffs[NUM_TERMS];
-uniform float denominator_coeffs[NUM_TERMS];
-
-/**
- * Point in the complex plane
- */
-uniform vec2 c;
 
 /**
  * Compute the powers
@@ -78,12 +87,11 @@ void compute_powers(inout vec2[NUM_TERMS] powers, vec2 z) {
 
 /**
  * Compute
- * 
- *        az^8 + bz^7 + cz^6 + dz^5 + ez^4 + ez^3 + fz^2 + gz + h
- * f(z) = ------------------------------------------------------- + C
- *        iz^8 + jz^7 + kz^6 + lz^5 + mz^4 + nz^3 + oz^2 + pz + q
  *
- * Where C is the current position
+ * f(z) = az^3 + bz^2 + cz + d + C
+ *
+ * Where C is the current position and the other variables are coefficients
+ * passed in from JavaScript
  */
 vec2 f(vec2 z) {
     vec2 powers[NUM_TERMS];
@@ -93,10 +101,9 @@ vec2 f(vec2 z) {
     vec2 bottom_sum = vec2(0.0);
     for (int i = 0; i < NUM_TERMS; i++) {
         top_sum += numerator_coeffs[i] * powers[i];
-        bottom_sum += denominator_coeffs[i] * powers[i];
     }
 
-    return cdiv(top_sum, bottom_sum) + c;
+    return top_sum + c;
 }
 
 float haversin(float x) {
@@ -104,18 +111,30 @@ float haversin(float x) {
 }
 
 void main() {
+    // Compute the julia set
     vec2 angles = to_angles(fUv);
     vec2 z = to_complex(angles);
-
     EscapeTimeResults results = escape_time(z);
 
-    float percent = results.iterations / float(MAX_ITERATIONS);
-    float angle = atan(results.position.y, results.position.x);
-    float wave = sin(5.0 * angle);
+    // Coloring for points outside the julia set
 
-    vec3 color = wave * vec3(0.0, 0.45, 0.33);
+    // Odd/even iteration count
+    float iter_mask = 0.5 + 0.5 * mod(results.iterations, 2.0);
 
+    // Escape angle
+    float angle = atan(results.position.y, results.position.x); 
+    float angle_norm = fract(angle / PI);
 
-    //float circle = step(2.0, length(z));
-    gl_FragColor = vec4(color, haversin(angle));
+    vec3 outside_color = iter_mask * cos_palette(outside_palette, angle_norm);
+
+    // Coloring 3: Odd/even max radius
+    float max_r_mask = 0.5 + 0.5 * mod(10.0 * results.max_dist_sqr, 2.0);
+
+    // Coloring 4: Polyline Distance
+    float dist = fract(results.poly_dist);
+    vec3 inside_color = cos_palette(inside_palette, dist);
+
+    vec3 color = mix(inside_color, outside_color, results.escaped);
+
+    gl_FragColor = vec4(color, 1.0);
 }

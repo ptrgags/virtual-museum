@@ -1,5 +1,5 @@
 #define PI 3.1415
-#define MAX_ITERATIONS 300
+#define MAX_ITERATIONS 200
 varying vec2 fUv;
 
 uniform float escape_radius;
@@ -33,6 +33,10 @@ struct EscapeTimeResults {
     float iterations;
     vec2 position;
     float escaped;
+    // Distance of a polygonal line through each iteration
+    float poly_dist;
+    // Maximum distance the iterated point achieved (squared)
+    float max_dist_sqr;
 };
 
 // Function to iterate
@@ -40,11 +44,28 @@ vec2 f(vec2 z);
 
 EscapeTimeResults escape_time(vec2 z) {
     float radius_squared = escape_radius * escape_radius;
+
+    // Keep track of the two most recent points
+    vec2 prev = z;
     vec2 pos = z;
+
     EscapeTimeResults results;
+    results.poly_dist = 0.0;
+    results.max_dist_sqr = 0.0;
+    
     for (int i = 0; i < MAX_ITERATIONS; i++) {
+        // Move forward one iteration
+        prev = pos;
         pos = f(pos);
-        if (dot(pos, pos) > radius_squared) {
+
+        float modulus_squared = dot(pos, pos);
+
+        // Update the distance traveled and max distance from origin
+        results.poly_dist += length(pos - prev);
+        results.max_dist_sqr = max(results.max_dist_sqr, modulus_squared);
+
+        // Check if we escaped the circle
+        if (modulus_squared > radius_squared) {
             results.iterations = float(i);
             results.position = pos;
             results.escaped = 1.0;
