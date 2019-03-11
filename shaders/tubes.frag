@@ -35,7 +35,7 @@ float sdf(vec3 pos) {
 
     // Slice off the top of the layer that goes through the origin, this
     // makes a halfpipe so we can see out
-    float slab = sdf_slab(pos, 0.3, 0.3); 
+    float slab = sdf_slab(pos, 0.4, 0.3); 
     float halfpipe = sdf_sub(tubes_n_cubes, slab);
 
     return halfpipe;
@@ -47,7 +47,7 @@ void main() {
     vec3 standard_wall = wall_coord();
     vec3 standard_eye = standardize_eye();
 
-    const float ROOM_SCALE = 0.01;
+    const float ROOM_SCALE = 0.1;
     standard_wall *= ROOM_SCALE;
     standard_eye *= ROOM_SCALE;
 
@@ -55,13 +55,14 @@ void main() {
     vec3 direction = normalize(standard_wall - standard_eye);
 
     // Move through the field of spheres
-    vec3 aisle_offset = vec3(1.0, 0.0, 1.0);
-    vec3 movement = 0.01 * time * vec3(0.0, 1.0, 0.0);
+    vec3 aisle_offset = vec3(0.0, 0.5, 1.0);
+    vec3 movement = 0.2 * time * vec3(0.0, 0.0, -1.0);
     vec3 box_pos = aisle_offset + movement;
     RaymarchResults results = raymarch(box_pos + standard_eye, direction);
 
     // Apply diffuse lighting and fog
-    vec3 shaded = lambert_shading(results.pos, box_pos, results.color, ROOM_SCALE);
+    vec3 shaded = lambert_shading(
+        results.pos, box_pos, results.color, ROOM_SCALE, 0.2);
     vec3 foggy = fog(shaded, results.depth, 0.05);
    
     // Output to screen

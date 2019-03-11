@@ -205,7 +205,12 @@ float is_visible(vec3 pos, vec3 light_dir) {
 /**
  * Apply simple lambert shading to a point in the scene
  */
-vec3 lambert_shading(vec3 pos, vec3 box_pos, vec3 surface_color, float scale) {
+vec3 lambert_shading(
+        vec3 pos, 
+        vec3 box_pos, 
+        vec3 surface_color, 
+        float scale,
+        float intensity) {
     vec3 N = get_normal(pos);
 
     // lights are specified relative to the current box position
@@ -230,7 +235,7 @@ vec3 lambert_shading(vec3 pos, vec3 box_pos, vec3 surface_color, float scale) {
 
         //float visibility = is_visible(pos, light_dir); 
 
-        float lambert = LIGHT_INTENSITY /** visibility*/ * max(dot(L, N), 0.0);
+        float lambert = intensity /** visibility*/ * max(dot(L, N), 0.0);
         color += surface_color * lambert / dist_sqr;
     }
     return color;
