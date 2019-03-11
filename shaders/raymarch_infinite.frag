@@ -61,6 +61,11 @@ float sdf_cube(vec3 pos, float radius) {
     //return max_coord - radius;
 }
 
+// Infinite slab in the xz-plane
+float sdf_slab(vec3 pos, float center, float half_thickness) {
+    return abs(pos.y - center) - half_thickness;
+}
+
 // Signed distance function represents the distance
 // to the nearest surface in the scene
 // + means outside, - means inside

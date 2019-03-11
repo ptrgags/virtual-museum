@@ -15,40 +15,30 @@ vec3 repeat(vec3 v, float num_cells) {
 float sdf(vec3 pos) {
     // Subdivide space into cells
     vec3 cells = repeat(pos, 1.0);
-    //vec3 cells = pos - vec3(0.0, 0.5, 2.0);
 
-    // Have a separate grid for the
-    vec3 xz_cells = repeat(pos, 1.0);
-    xz_cells.y = pos.y;
-
-    // Make a ton of little cubes
+    // Make a 3D lattice of cubes
     const float CUBE_SIZE = 0.5;
     float cubes = sdf_cube(cells, CUBE_SIZE);
 
+    // Make 2D lattices of cylinders that intersects the cubes 
     const float TUBE_RADIUS = 0.3;
-    float tube_x = sdf_cylinder(xz_cells.zxy, TUBE_RADIUS);
-    float tube_z = sdf_cylinder(xz_cells.yzx, TUBE_RADIUS);
+    float tube_x = sdf_cylinder(cells.zxy, TUBE_RADIUS);
+    float tube_z = sdf_cylinder(cells.yzx, TUBE_RADIUS);
     float tube = sdf_union(tube_x, tube_z);
 
+    // Make a slightly thinner versionn of the tube 
+    float thinner_tube = tube + 0.1;
 
-    float both = sdf_union(tube, cubes);//abs(cubes);
+    // Combine the cubes and big cylinder lattice, then cut out a tunnel
+    float tubes_n_cubes = sdf_union(tube, cubes);
+    tubes_n_cubes = sdf_sub(tubes_n_cubes, thinner_tube);
 
-    return both;
+    // Slice off the top of the layer that goes through the origin, this
+    // makes a halfpipe so we can see out
+    float slab = sdf_slab(pos, 0.3, 0.3); 
+    float halfpipe = sdf_sub(tubes_n_cubes, slab);
 
-
-    /*
-    // Put a sphere in each box
-    float sphere = sdf_sphere(cells, 0.5);
-
-    // Make an infinite lattice of thin, infinite cylinders in three directions
-    const float GRID_THICKNESS = 0.06;
-    vec3 cells2 = repeat_domain(pos, 0.25);
-    float cylinders = sdf_union(cyl_y, cyl_z);
-    cylinders = sdf_union(cylinders, cyl_x);
-
-    // Use the cylinder lattice to bore holes through the spheres.
-    return sphere; //sdf_sub(sphere, cylinders);
-    */
+    return halfpipe;
 }
 
 void main() {
