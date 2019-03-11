@@ -507,10 +507,16 @@ class ToonExhibit extends Exhibit {
         for (let helper of this.colored_light_helpers)
             helper.update();
 
+        const SHELL_HEIGHT = 0.21 * this.ROOM_SIZE;
+        const MOTION_AMP = 0.5;
+
+
         //TODO: Add custom animations
         for (let shell of this.shells) {
             shell.rotation.y -= 0.01;
-            shell.position.y += 0.01 * Math.sin(t - shell.position.x);
+            let phase = shell.position.x + shell.position.z;
+            shell.position.y = 
+                SHELL_HEIGHT + MOTION_AMP * Math.sin(t + phase);
         }
     }
 }
