@@ -4,7 +4,7 @@ class Museum {
         this.make_exhibits();
 
         // Specify the starting room in index space
-        this.ENTRANCE = new THREE.Vector2(4, 4);
+        this.ENTRANCE = new THREE.Vector2(3, 6);
         this.current_room = this.ENTRANCE;
 
         // Keep a single moveable camera around.
@@ -36,15 +36,14 @@ class Museum {
     make_exhibits() {
         // make the exhibits
         let exhibits = [
-            [[2, 4], new MirrorSphereExhibit()],
+            [[4, 3], new MirrorSphereExhibit()],
             [[4, 5], new JuliaSphereExhibit(this)],
             [[3, 4], new ToonExhibit()],
-            [[4, 4], new RaymarchExhibit(
-                'west', 'shaders/tubes.frag', this)],
+            [[4, 4], new Exhibit()],
+            [[3, 6], new RaymarchExhibit(
+                'east', 'shaders/tubes.frag', this)],
             [[4, 6], new RaymarchExhibit(
                 'east', 'shaders/sphere_lattice.frag', this)],
-            [[3, 6], new Exhibit()],
-            [[2, 6], new Exhibit()],
         ];
 
         // Register the exhibits
