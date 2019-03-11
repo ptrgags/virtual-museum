@@ -1,5 +1,5 @@
 #define PI 3.1415
-#define MAX_ITERATIONS 300
+#define MAX_ITERATIONS 200
 varying vec2 fUv;
 
 uniform float escape_radius;

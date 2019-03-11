@@ -28,8 +28,8 @@ class JuliaSphereExhibit extends Exhibit {
                 c: {value: vec2(.285, .01)},
                 escape_radius: {value: 2.0},
                 // z^2 + c 
-                numerator_coeffs: {value: [0, 0, 1, 0, 0]},
-                denominator_coeffs: {value: [0, 0, 1.5, 0, 0]}
+                numerator_coeffs: {value: [0, 0, 1, 0]},
+                //denominator_coeffs: {value: [0, 0, 1.5, 0]}
             },
             name: 'julia_sphere',
             vertexShader: vert,
