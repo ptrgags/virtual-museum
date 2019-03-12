@@ -3,7 +3,7 @@
  *
  * The signs support up to 32x32
  */
-class SignMaker() {
+class SignMaker {
     constructor() {
         this.sign_geom = new THREE.PlaneGeometry(2, 2);
     }
@@ -19,7 +19,7 @@ class SignMaker() {
             ajax('shaders/sign.frag')];
 
         return Promise.all(requests)
-            .then(store_resources);
+            .then((x) => this.store_resources(x));
         
     }
 
@@ -47,7 +47,7 @@ class SignMaker() {
                 }
             ]),
             name: 'sign',
-            vertexShader: this.vert
+            vertexShader: this.vert,
             fragmentShader: this.frag,
             lights: true,
         });
