@@ -312,7 +312,9 @@ class Exhibit {
     }
 
     get label() {
-        return 'Just a boring room'
+        return 'Just a  ' 
+            +'boring  '
+            +'room'
     }
 }
 

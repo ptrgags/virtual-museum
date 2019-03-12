@@ -24,7 +24,18 @@ uniform vec2 text_dimensions;
 
 varying vec2 fUv;
 
-vec4 character_lookup(vec2 uv, int char_code) {
+int character_lookup(int idx) {
+    // GLSL does not allow random access to arrays :/
+    for (int i = 0; i <= MAX_LENGTH; i++) {
+        if (i == idx)
+            return text[i];
+    }
+    // Return an exclamation point for error
+    const int EXCLAMATION = 33;
+    return EXCLAMATION;
+}
+
+vec4 texture_lookup(vec2 uv, int char_code) {
     // Determine which cell the desired character is located at
     float code = float(char_code);
     vec2 cell_id = vec2(
@@ -42,10 +53,21 @@ vec4 character_lookup(vec2 uv, int char_code) {
 }
 
 void main() {
-    vec4 char_color = character_lookup(fUv, 33);
 
+    // Make a grid of output cells to put the text
+    vec2 cell_uv = fract(fUv * text_dimensions);
+    vec2 cell_id = floor(fUv * text_dimensions);
+    cell_id.y = (text_dimensions.y - 1.0) - cell_id.y;
+
+    // Get index into the text array
+    int str_index = int(cell_id.y * text_dimensions.x + cell_id.x);
+
+    int char_code = character_lookup(str_index);
+
+    vec4 char_color = texture_lookup(cell_uv, char_code);
 
     vec3 color = mix(bg_color, fg_color, char_color.a);
 
+    //gl_FragColor = vec4(color, 1.0);
     gl_FragColor = vec4(color, 1.0);
 }

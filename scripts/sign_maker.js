@@ -43,7 +43,8 @@ class SignMaker {
                 text: {value: baked_text},
                 fg_color: {value: color},
                 bg_color: {value: vec3(1.0, 1.0, 1.0)},
-                font_texture: {value: this.texture}
+                font_texture: {value: this.texture},
+                text_dimensions: {value: vec2(8, 8)}
             },
             name: 'sign',
             vertexShader: this.vert,
