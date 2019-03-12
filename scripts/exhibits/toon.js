@@ -5,13 +5,13 @@ let TOON_SHELLS = [
     {
         name: 'squagel',
         seashell_params: {
-            coil_radius: vec2(1, 1),
+            coil_radius: vec2(0.7, 0.7),
             coil_logarithm: vec2(0, 0),
             coil_angle: vec2(0, 2.3 * Math.PI),
             coil_z: vec2(0, 0),
             coil_p: vec2(10, 10),
             coil_q: vec2(10, 10),
-            cross_section_radius: vec2(0.5, 0.5), 
+            cross_section_radius: vec2(0.4, 0.4), 
             cross_section_twist: vec2(0, 0),
             cross_section_m: vec2(8, 8),
             cross_section_n: vec2(8, 8),
@@ -37,7 +37,7 @@ let TOON_SHELLS = [
         name: 'logarithmic-spiral',
         seashell_params: {
             coil_radius: vec2(0.1, 0.1),
-            coil_logarithm: vec2(3, 3),
+            coil_logarithm: vec2(2.5, 2.5),
             coil_angle: vec2(0, 9.0 * Math.PI),
             coil_z: vec2(0, 0),
             coil_p: vec2(2, 2),
@@ -206,7 +206,7 @@ let TOON_SHELLS = [
             coil_radius: vec2(0.8, 0),
             coil_logarithm: vec2(0, 0),
             coil_angle: vec2(0, 8.0 * Math.PI),
-            coil_z: vec2(0, 1),
+            coil_z: vec2(0, 1.25),
             coil_p: vec2(2, 2),
             coil_q: vec2(2, 2),
             cross_section_radius: vec2(0.3, 0), 
