@@ -48,6 +48,7 @@ let TOON_SHELLS = [
             cross_section_n: vec2(2, 2),
         },
         rotate_x: true,
+        v_resolution: 200
     }, 
     {
         name: 'archimedian-spiral',
@@ -63,7 +64,8 @@ let TOON_SHELLS = [
             cross_section_m: vec2(2, 2),
             cross_section_n: vec2(2, 2),
         },
-        rotate_x: true
+        rotate_x: true,
+        v_resolution: 200
     },
     {
         name: 'cone-shell',
@@ -79,6 +81,7 @@ let TOON_SHELLS = [
             cross_section_m: vec2(2, 2),
             cross_section_n: vec2(2, 2),
         },
+        
     },
     {
         name: 'star-coil',
@@ -108,7 +111,8 @@ let TOON_SHELLS = [
             cross_section_twist: vec2(0, 0),
             cross_section_m: vec2(2, 2),
             cross_section_n: vec2(2, 2),
-        }
+        },
+        v_rresolution: 200
     },
     {
         name: 'exponential-twister',
@@ -123,7 +127,8 @@ let TOON_SHELLS = [
             cross_section_twist: vec2(0, 0),
             cross_section_m: vec2(2, 2),
             cross_section_n: vec2(2, 2),
-        }
+        },
+        v_resolution: 200
     },
     {
         name: 'squarish-shell',
@@ -138,7 +143,7 @@ let TOON_SHELLS = [
             cross_section_twist: vec2(0, 0),
             cross_section_m: vec2(10, 10),
             cross_section_n: vec2(10, 10),
-        }
+        },
     },
     {
         name: 'twisty-helix',
@@ -153,7 +158,8 @@ let TOON_SHELLS = [
             cross_section_twist: vec2(0, 8.0 * Math.PI),
             cross_section_m: vec2(0.8, 0.8),
             cross_section_n: vec2(0.8, 0.8),
-        }
+        },
+        u_resolution: 100
     },
     {
         name: 'exponent-spaghetti',
@@ -168,7 +174,8 @@ let TOON_SHELLS = [
             cross_section_twist: vec2(0, 0),
             cross_section_m: vec2(2, 2),
             cross_section_n: vec2(2, 2),
-        }
+        },
+        v_resolution: 200,
     },
     {
         name: 'asymmetric',
@@ -183,7 +190,9 @@ let TOON_SHELLS = [
             cross_section_twist: vec2(0, 0),
             cross_section_m: vec2(3, 0.1),
             cross_section_n: vec2(0.1, 3),
-        }
+        },
+        u_resolution: 50,
+        v_resolution: 200
     },
     {
         name: 'vary-shape',
@@ -198,7 +207,7 @@ let TOON_SHELLS = [
             cross_section_twist: vec2(0, 0),
             cross_section_m: vec2(2, 2),
             cross_section_n: vec2(2, 2),
-        }
+        },
     },
     {
         name: 'manhattan-cone',
@@ -228,7 +237,8 @@ let TOON_SHELLS = [
             cross_section_twist: vec2(0, 4.0 * Math.PI),
             cross_section_m: vec2(1, 1),
             cross_section_n: vec2(1, 1),
-        }
+        },
+        u_resolution: 50,
     },
     {
         name: 'twisted-donut',
@@ -240,11 +250,12 @@ let TOON_SHELLS = [
             coil_p: vec2(2, 2),
             coil_q: vec2(2, 2),
             cross_section_radius: vec2(0.3, 0.3), 
-            cross_section_twist: vec2(0, 2 * Math.PI),
+            cross_section_twist: vec2(0, 2.0 * Math.PI),
             cross_section_m: vec2(1, 1),
             cross_section_n: vec2(1, 1),
         },
-        rotate_x: true
+        rotate_x: true,
+        u_resolution: 50,
     }
 ];
 
@@ -341,8 +352,9 @@ class ToonExhibit extends Exhibit {
             let material = this.materials.get(mat_name);
             material.name = mat_name;
 
-            // TODO: Have the params control the u and v resolution;
-            let geometry = new THREE.PlaneGeometry(1, 1, 24, 100);
+            let u_res = seashell.u_resolution || 24;
+            let v_res = seashell.v_resolution || 100;
+            let geometry = new THREE.PlaneGeometry(1, 1, u_res, v_res);
 
             let mesh = new THREE.Mesh(geometry, material);
             mesh.castShadow = true;
