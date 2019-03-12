@@ -8,6 +8,13 @@ let ajax = function(url) {
     });
 };
 
+let get_texture = function(url) {
+    return new Promise((resolve, reject) => {
+        let loader = new THREE.TextureLoader();
+        loader.load(url, resolve, undefined, reject);
+    });
+};
+
 let vec2 = function(x, y) {
     return new THREE.Vector2(x, y);
 }

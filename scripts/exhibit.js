@@ -25,11 +25,14 @@ class Exhibit {
     load(door_info) {
         this.is_loading = true;
 
-        // Request any shaders if needed
-        // TODO: Probably will have another clause and/or parameter
-        // for textures and other resources eventually
+
+        // Gather up promises for resources
+        let texture_requests = this.make_texture_requests();
         let shader_requests = this.make_shader_requests();
-        Promise.all(shader_requests)
+
+        Promise.all(texture_requests)
+            .then((textures) => this.store_textures(textures))
+            .then(() => Promise.all(shader_requests))
             .then((shaders) => this.make_materials(shaders))
             .then(() => this.setup_scene(door_info))
             .then(() => this.is_loading = false)
@@ -66,6 +69,27 @@ class Exhibit {
         this.doors = new Map();
         this.walls = [];
         this.main_objs = [];
+    }
+
+    /**
+     * Subclasses can override to load more textures. Just make sure to
+     * only append to the array so store_textures() does not get confused.
+     * Every room will need the font texture for the door so that
+     * gets loaded here.
+     */
+    make_texture_requests() {
+        return [get_texture('textures/font.png')]
+    }
+
+    /**
+     * Store textures in a map that can be accessed when making materials 
+     */
+    store_textures(textures) {
+        let [font, ] = textures;
+
+        this.textures = new Map([
+            ['font', font]
+        ]);
     }
 
     /**
