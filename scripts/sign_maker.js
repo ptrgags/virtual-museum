@@ -39,17 +39,15 @@ class SignMaker {
         let baked_text = this.encode_text(text);
 
         return new THREE.ShaderMaterial({
-            uniforms: THREE.UniformsUtils.merge([
-                THREE.UniformsLib['lights'],
-                {
-                    text: {value: baked_text},
-                    diffuse: {value: color}
-                }
-            ]),
+            uniforms: {
+                text: {value: baked_text},
+                fg_color: {value: color},
+                bg_color: {value: vec3(1.0, 1.0, 1.0)},
+                font_texture: {value: this.texture}
+            },
             name: 'sign',
             vertexShader: this.vert,
             fragmentShader: this.frag,
-            lights: true,
         });
     }
 
@@ -67,5 +65,6 @@ class SignMaker {
      */
     make_sign(material) {
         let quad = new THREE.Mesh(this.sign_geom, material);
+        return quad;
     }
 }

@@ -1,8 +1,8 @@
 // Length of the desired text
 #define MAX_LENGTH 512
 // Font is a 16x16 grid of cells
-#define FONT_ROWS 16
-#define FONT_COLS 16
+#define FONT_ROWS 16.0
+#define FONT_COLS 16.0
 // However, many of the characters are non-printable, so let's only use
 // a limited rangge
 #define MIN_CHAR 32
@@ -13,7 +13,7 @@ uniform vec3 fg_color;
 uniform vec3 bg_color;
 
 // Buffer of text as ASCII codes between MIN_CHAR and MAX_CHAR
-uniform int[MAX_LENGTH] text;
+uniform int text[MAX_LENGTH];
 
 // Texture containing our font
 uniform sampler2D font_texture;
@@ -22,15 +22,17 @@ uniform sampler2D font_texture;
 // be less than or equal to MAX_LENGTH
 uniform vec2 text_dimensions;
 
+varying vec2 fUv;
+
 vec4 character_lookup(vec2 uv, int char_code) {
     // Determine which cell the desired character is located at
     float code = float(char_code);
     vec2 cell_id = vec2(
-        floor(code / FONT_COLS),
-        mod(code, FONT_COLS));
+        mod(code, FONT_COLS),
+        floor(code / FONT_COLS));
 
     // Flip y since textures are measured from bottom left
-    cell_id.y = (FONT_ROWS - 1) - cell_id.y;
+    cell_id.y = (FONT_ROWS - 1.0) - cell_id.y;
 
     // Select out the proper cell from the texture
     vec2 char_uv = (cell_id + uv) / FONT_COLS;
@@ -40,7 +42,10 @@ vec4 character_lookup(vec2 uv, int char_code) {
 }
 
 void main() {
-    vec4 char_color = character_lookup(fUv, char_code);
+    vec4 char_color = character_lookup(fUv, 33);
 
-    gl_FragColor = char_color;
+
+    vec3 color = mix(bg_color, fg_color, char_color.a);
+
+    gl_FragColor = vec4(color, 1.0);
 }

@@ -129,8 +129,7 @@ class MuseumLayout {
         for (let dir of ['east', 'north', 'west', 'south']) {
             let [, adjacent] = this.get_neighbor(pos, dir);
             if (adjacent) {
-                // TODO: Also push the adjacent room's label
-                info.push(dir); 
+                info.push([dir, adjacent.label]); 
             }
         }
         return info;

@@ -30,14 +30,16 @@ class Exhibit {
         let texture_requests = this.make_texture_requests();
         let shader_requests = this.make_shader_requests();
 
+        let door_directions = door_info.map(([dir, ]) => dir);
+
         
         Promise.all(texture_requests)
             .then((textures) => this.store_textures(textures))
             .then(() => Promise.all(shader_requests))
             .then((shaders) => this.make_materials(shaders))
-            .then(() => this.setup_scene(door_info))
-            .then(this.sign_maker.load()) // returns a promise
-            .then(() => console.log("signs loaded successfully"))
+            .then(() => this.setup_scene(door_directions))
+            .then(() => this.sign_maker.load())
+            .then(() => this.make_signs(door_info))
             .then(() => this.is_loading = false)
             .catch(console.error);
     }
@@ -133,7 +135,6 @@ class Exhibit {
     }
 
     setup_scene(door_info) {
-
         let lights = this.make_lights();
         let floor = this.make_floor();
         this.walls = this.make_walls();
@@ -224,6 +225,15 @@ class Exhibit {
         return doors;
     }
 
+    make_signs(door_info) {
+        let [door_dir, label] = door_info[0];
+        let mat = this.sign_maker.make_text_material(label, vec3(1.0, 0.0, 0.0));
+        let sign = this.sign_maker.make_sign(mat);
+        sign.position.y = 0.5 * this.ROOM_SIZE;
+        sign.scale.set(5, 5, 1);
+        this.scene.add(sign);
+    }
+
     make_walls() {
         let walls = new Map();
         for (let dir of this.DIRECTIONS.keys()) {
@@ -299,5 +309,15 @@ class Exhibit {
 
     update(t) {
         // called once a frame
+    }
+
+    get label() {
+        return 'Just a boring room'
+    }
+}
+
+class Entrance extends Exhibit {
+    get label() {
+        return 'Entrance'
     }
 }
