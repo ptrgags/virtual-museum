@@ -112,4 +112,17 @@ class JuliaSphereExhibit extends Exhibit {
 
         uniforms.c.value = this.complex_point;
     }
+
+    get label() {
+        return [
+            '        ',
+            ' Julia  ',
+            '  Set   ',
+            '        ',
+            'Fractal ',
+            ' Sphere ',
+            '        ',
+            '        ',
+        ].join('');
+    }
 }

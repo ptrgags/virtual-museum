@@ -171,4 +171,17 @@ class MirrorSphereExhibit extends Exhibit {
         this.cubes.rotation.x = tilt;
         this.gray_cubes.rotation.x = tilt;
     }
+
+    get label() {
+        return [
+            '        ',
+            ' Mirror ',
+            ' Sphere ',
+            '        ',
+            '        ',
+            '        ',
+            '        ',
+            '        ',
+        ].join('');
+    }
 }

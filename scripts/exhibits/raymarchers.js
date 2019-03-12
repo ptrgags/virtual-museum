@@ -77,4 +77,24 @@ class RaymarchExhibit extends Exhibit {
         this.uniforms.eye.value = this.eye;
         this.uniforms.time.value = (performance.now() - this.start_time) / 1000.0;
     }
+
+    get label() {
+        return [
+            '           ',
+            '           ',
+            '           ',
+            'Raymarchers',
+            '           ',
+            '           ',
+            '           ',
+            '           ',
+            '           ',
+            '           ',
+            '           ',
+        ].join('');
+    }
+
+    get text_dimensions() {
+        return vec2(11, 11);
+    }
 }
