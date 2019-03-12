@@ -54,7 +54,7 @@ class Exhibit {
             })],
             // TODO: Make a procedural wood shader
             ['door', new THREE.MeshPhongMaterial({
-                color: 0xffaa00,
+                color: 0xCCB797,
                 specular: 0x010101,
                 shininess: 20
             })],
@@ -166,7 +166,8 @@ class Exhibit {
                     let z = 0.8 * this.ROOM_SIZE * k;
 
                     let offset = vec3(x, y, z);
-                    let light = new THREE.PointLight(0xFFFFFF, 0.2, 2.0 * this.ROOM_SIZE);
+                    let light = new THREE.PointLight(
+                        0xFFFFFF, 0.2, 2.0 * this.ROOM_SIZE);
 
                     light.position.copy(offset);
                     lights.push(light);
@@ -226,12 +227,23 @@ class Exhibit {
     }
 
     make_signs(door_info) {
-        let [door_dir, label] = door_info[0];
-        let mat = this.sign_maker.make_text_material(label, vec3(1.0, 0.0, 0.0));
-        let sign = this.sign_maker.make_sign(mat);
-        sign.position.y = 0.5 * this.ROOM_SIZE;
-        sign.scale.set(5, 5, 1);
-        this.scene.add(sign);
+        const FG_COLOR = vec3(0.0, 0.0, 0.0);
+        const RADIUS = 0.94 * this.ROOM_SIZE;
+        for (let [door_dir, label_settings] of door_info) {
+            let sign = this.sign_maker.make_sign(
+                label_settings.text, label_settings);
+
+            let offset_dir = this.DIRECTIONS.get(door_dir);
+            let x = RADIUS * Math.cos(offset_dir);
+            let z = -RADIUS * Math.sin(offset_dir);
+            let y = this.ROOM_SIZE / 2.0;
+
+            sign.position.set(x, y, z);
+            sign.rotation.y = offset_dir - Math.PI / 2.0;
+            sign.scale.set(2, 2, 1);
+
+            this.scene.add(sign);
+        }
     }
 
     make_walls() {
@@ -312,14 +324,43 @@ class Exhibit {
     }
 
     get label() {
-        return 'Just a  ' 
-            +'boring  '
-            +'room'
+        return [
+            '        ',
+            ' Just a ',
+            ' boring ',
+            '  room  ',
+            '        ',
+            '        ',
+            '        ',
+            '        ',
+        ].join('');
+    }
+
+    get text_dimensions() {
+        return vec2(8, 8);
+    }
+
+    get label_settings() {
+        return {
+            text: this.label,
+            fg_color: vec3(0.578, 0.527, 0.363),
+            bg_color: vec3(0.941, 0.918, 0.839),
+            text_dimensions: this.text_dimensions
+        }
     }
 }
 
 class Entrance extends Exhibit {
     get label() {
-        return 'Entrance'
+        return [
+            '        ',
+            '        ',
+            'Entrance',
+            '        ',
+            '        ',
+            '        ',
+            '        ',
+            '        ',
+        ].join('');
     }
 }

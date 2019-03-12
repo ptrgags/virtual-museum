@@ -35,16 +35,16 @@ class SignMaker {
      *
      * text: a string of ascii text, no longer than 256 characters
      */
-    make_text_material(text, color) {
+    make_text_material(text, settings) {
         let baked_text = this.encode_text(text);
 
         return new THREE.ShaderMaterial({
             uniforms: {
                 text: {value: baked_text},
-                fg_color: {value: color},
-                bg_color: {value: vec3(1.0, 1.0, 1.0)},
+                fg_color: {value: settings.fg_color},
+                bg_color: {value: settings.bg_color},
                 font_texture: {value: this.texture},
-                text_dimensions: {value: vec2(8, 8)}
+                text_dimensions: {value: settings.text_dimensions}
             },
             name: 'sign',
             vertexShader: this.vert,
@@ -64,7 +64,8 @@ class SignMaker {
      * pass the material this class created back in, since the caller
      * may have stored it somewhere else
      */
-    make_sign(material) {
+    make_sign(text, settings) {
+        let material = this.make_text_material(text, settings)
         let quad = new THREE.Mesh(this.sign_geom, material);
         return quad;
     }
