@@ -18,6 +18,8 @@ struct SpotLight {
 
 uniform SpotLight spotLights[NUM_SPOT_LIGHTS];
 
+uniform vec3 diffuse;
+
 varying vec3 fPositionView;
 varying vec3 fNormalView;
 varying vec2 fUv;
@@ -61,10 +63,9 @@ void main() {
 
         float inside_cone = float(dot(L, S) < spotLights[i].coneCos);
         float intensity = max(dot(L, N), 0.0);
-        // TODO: Add model diffuse color
-        vec3 diffuse = intensity * spotLights[i].color;
+        vec3 diffuse_color = intensity * diffuse * spotLights[i].color;
 
-        color += inside_cone * diffuse;
+        color += inside_cone * diffuse_color;
     }
 
 

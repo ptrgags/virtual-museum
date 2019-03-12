@@ -271,7 +271,8 @@ class ToonExhibit extends Exhibit {
             uniforms: THREE.UniformsUtils.merge([
                 THREE.UniformsLib['lights'],
                 {
-                    seashell_params: {value: {}}
+                    seashell_params: {value: {}},
+                    diffuse: {value: vec3(1.0, 1.0, 1.0)}
                 }
             ]),
             name: 'seashell',
@@ -286,6 +287,13 @@ class ToonExhibit extends Exhibit {
         return [];
     }
 
+    rand_color() {
+        return vec3(
+            Math.random(),
+            Math.random(),
+            Math.random());
+    }
+
     make_materials(shader_text) {
         let [seashell_vert, toon_frag] = shader_text;
 
@@ -296,6 +304,7 @@ class ToonExhibit extends Exhibit {
             let mat_name = `toon-${seashell.name}`;
             let mat = seashell_mat.clone();
             mat.uniforms.seashell_params.value = seashell.seashell_params;
+            mat.uniforms.diffuse.value = this.rand_color();
             this.materials.set(mat_name, mat);
         }
     }
