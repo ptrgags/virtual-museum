@@ -112,7 +112,7 @@ the set differently:
 3. The iteration count is used to add alternating bands of darker shading.
     Again, this is only for points outside the Julia Set.
 
-As far as the colors, I used Ìñigo Quìlez' Cosine palettes (see bibliography
+As far as the colors, I used Íñigo Quílez's Cosine palettes (see bibliography
 for a link). This method of coloring is simple to use and looks nicer than
 most RGB or even HSL palettes.
 
@@ -134,9 +134,113 @@ is the north pole and 0 is the south pole.
     is essentially a complex plane! the center of the floor is the origin,
     and the walls are a distance 2 from the origin.
 
+### Raymarchers
+
+Raymarching is one of several methods of rendering a 3D scene on a 2D screen.
+Or in this case, I render a 3D scene on a 2D screen in the 3D world of the
+virtual musem on your 2D monitor in a 3D world. Dizzy yet?
+
+For an in-depth overview on the topic, see [this article](http://jamie-wong.com/2016/07/15/ray-marching-signed-distance-functions/)
+by Jamie Wong.
+
+### Box Camera
+
+Unlike most raymarchers that lie on a flat quad in a 2D world, I chose
+to render my raymarcher on the wall. Furthermore, I wanted this fancy 3D
+wallpaper to react to the player's movement. Thus, the eye and image plane
+are passed into the shader dynamically. This allows the player to move around
+and see the scene.
+
+#### Constructive Solid Geometry
+
+My raymarchers use CSG operations to define the scene:
+
+* For the sphere lattice room, I start with an infinite lattice of spheres
+    and a slightly denser lattice of cylinders along all three directions.
+    I subtract the cylinders from the sphere to make the holes.
+* For the tubes and cubes room, I start with an infinite lattice of cubes
+    and union it with 2D lattices of cylinders. I then subtract out thinner
+    cylinders to turn the cylinders into tubes. Finally, I cut the top of
+    the first layer by subtracting an infinite slab so it looks like a 
+    halfpipe
+
 ### Mirror Sphere
 
-### Raymarchers
+The mirror sphere is my first attempt at working with environment maps.
+This exhibit was made last-minute, so I only used built-in Three.js classes.
+The `CubeCamera` is used to generate a cubemap, and this is passed to
+a `MeshBasicMaterial` as a texture. 
+
+There are two scenes: One scene has a room with a ring of colored cubes.
+This is the scene used to generate the cubemap each frame.
+
+The second scene contains the same objects, except they are in grayscale.
+It also has an additional object: a mirrored ball which uses the cubemap
+to produce a reflective surface.
+
+## HUD
+
+This museum provides a map and compass to the user. The compass always points
+to the north side of the room, while the map shows you which room you are
+in and where the other rooms are.
+
+## Code Overview
+
+**Third party code:**
+
+* `scripts/three.js` -- a Copy of Three.js r100
+
+**JavaScript Code:**
+
+* `scripts/main.js` -- This is the entry point for the application
+* `scripts/museum.js` -- This defines the Museum class, which is a high level
+    collection of exhibits. This is where the positioning of each room
+    is configured, so this file changes the most frequently
+* `scripts/museum_layout.js` -- This is a lower-level data structure that
+    represents a 2D array of Exhibits
+* `scripts/first_person_camera.js` -- This class defines how the user interacts
+    with the camera with keyboard and mouse. 
+* `hud.js` -- handles rendering 2D overlay for the map and compass
+* `sign_maker.js` -- This class handles making signs for thhe doors
+* `utils.js` -- miscellaneous helper functions
+* `exhibits/*.js` -- look here for the exhibit-specific code
+
+**GLSL Code:**
+
+Vertex Shaders:
+
+* `uv_quad.vert` -- Vertex shader for simple objects that need UV coords
+* `super_seashell.vert` -- Vertex shader that defines the super seashell
+    geometry
+
+Fragment Shaders:
+
+* `compass.frag` -- Compass HUD component
+* `minimap.frag` -- Map HUD component
+* `sign.frag` -- Text shader for the door
+* `toon.frag` -- Toon shader for the super seashells
+* `escape_time_sphere.frag` -- Partial shader for rendering with the escape time
+    algorithm on the Riemann Sphere. Used with `julia_sphere.frag`
+* `julia_sphere.frag` -- Partial shader for rendering a Julia set on the
+    riemann sphere. Requires prepending `escape_time_sphere.frag`
+* `raymarch_infinite.frag` -- Partial shader for raymarching scenes
+* `sphere_lattice.frag` -- raymarcher for infinite sphere latice with holes
+* `tubes.frag` -- raymarcheer for infinite grid of cubes and tubes
+
+## Special Thanks
+
+I would like to thank Professor Breen for letting me do this Honors Option
+project and for taking the time to discuss the progress throughout the term!
+
+I would also like to thank some of my friends for testing my project
+in advance and providing useful feedback along the way!
+
+* Khanh N. -- First one to note the lag in the Julia sphere room, and provided 
+    feedback on choices of colors for some of the exhibits.
+* Zacharia T. -- Provided detailed feedback at each major revision
+* Ashley C. -- Provided feedback on how to light the super seashell room 
+    properly.
+* Royce R. -- Informed me my FOV was a bit cramped.
 
 ## Annotated Bibliography
 
