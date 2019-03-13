@@ -259,7 +259,7 @@ in advance and providing useful feedback along the way!
     not used for anything in this project.
 * Haugo, Simen. [Raymarching Distance Fields](http://9bitscience.blogspot.com/2013/07/raymarching-distance-fields_14.html)
     -- one of the sites I refer to when recalling details about raymarching
-* Quílez, Ìñigo. [distance functions](http://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm)
+* Quílez, Íñigo. [distance functions](http://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm)
     2008.
     -- this was a helpful reference for designing both raymarched scenes.
 * Quílez, Íñigo. [palettes](http://www.iquilezles.org/www/articles/palettes/palettes.htm)
