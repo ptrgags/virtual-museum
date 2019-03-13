@@ -124,7 +124,7 @@ coil(v) = [Re^(bv) * superellipse(phi, p, q).x]
 
 The `superellipse()` function takes the parametric equations for a unit circle
 and generalizes it where the cosine and sine can be raised to arbitrary powers.
-See [Superellipse]((http://mathworld.wolfram.com/Superellipse.html) on Wolfram
+See [Superellipse](http://mathworld.wolfram.com/Superellipse.html) on Wolfram
 Alpha for more information.
 
 ```
