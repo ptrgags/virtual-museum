@@ -26,7 +26,7 @@ varying vec2 fUv;
 
 int character_lookup(int idx) {
     // GLSL does not allow random access to arrays :/
-    for (int i = 0; i <= MAX_LENGTH; i++) {
+    for (int i = 0; i < MAX_LENGTH; i++) {
         if (i == idx)
             return text[i];
     }
