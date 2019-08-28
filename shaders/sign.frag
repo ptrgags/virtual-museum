@@ -1,5 +1,5 @@
 // Length of the desired text
-#define MAX_LENGTH 512
+#define MAX_LENGTH 256
 // Font is a 16x16 grid of cells
 #define FONT_ROWS 16.0
 #define FONT_COLS 16.0
@@ -68,6 +68,5 @@ void main() {
 
     vec3 color = mix(bg_color, fg_color, char_color.a);
 
-    //gl_FragColor = vec4(color, 1.0);
     gl_FragColor = vec4(color, 1.0);
 }
